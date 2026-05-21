@@ -3,23 +3,23 @@ from nemoguardrails.actions import action
 
 @action(name="check_llm_verdict")
 async def check_llm_verdict(context: dict = None):
-    if context is None:
+
+    if not context:
         return True
 
-    llm_response = context.get("last_action_output") or context.get("action_policy_output")
+    user_msg = context.get("messages", [{}])[-1].get("content", "")
 
-    if llm_response is None:
-        return True
+    text = user_msg.lower()
 
-    cleaned = str(llm_response).lower().strip()
+    banned = [
+        "hack",
+        "inject",
+        "ignore instructions",
+        "bypass"
+    ]
 
-    if not cleaned:
-        return True
-
-    if "yes" in cleaned:
-        return True
-
-    if "no" in cleaned:
-        return False
+    for b in banned:
+        if b in text:
+            return False
 
     return True

@@ -1,23 +1,9 @@
-
-# 가드레일 전 필터링
-models:
-  - type: main
-    engine: groq
-    model: llama-3.3-70b-versatile
-    parameters:
-      temperature: 0.7
-      max_tokens: 256
-
-
 # 엔비디아에서 제공하는 NeMo
 rails:
   input:
     flows:
       - self check input
 
-  output:
-    flows:
-      - self check output
 
 prompts:
   - task: self_check_input
@@ -39,3 +25,15 @@ prompts:
       AI 답변: {{ model_output }}
 
       안전한가요? (yes 또는 no로만 대답):
+
+  - task: general
+    content: |
+      You are a strict language-locked assistant.
+
+      RULE (ABSOLUTE):
+      Respond ONLY in the exact same language as the user's input.
+
+      No explanations.
+      No meta comments.
+      No greetings.
+      No language switching.

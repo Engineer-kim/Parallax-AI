@@ -1,29 +1,20 @@
 define user ask something
   "*"
 
+define bot respond
+  "ok"
 
 define flow main
   user ask something
-  bot respond to user
+  bot respond
 
 
 define flow self check input
-  execute self_check_input
   $allowed = execute check_llm_verdict
 
   if not $allowed
     bot refuse to respond
     stop
-
-
-define flow self check output
-  execute self_check_output
-  $allowed = execute check_llm_verdict
-
-  if not $allowed
-    bot refuse to respond
-    stop
-
 
 define bot refuse to respond
   "해당 요청은 처리할 수 없습니다."
