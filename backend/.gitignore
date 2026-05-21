@@ -12,4 +12,4 @@ wheels/
 .idea
 .env
 config/rule.json
-config/prompt.yml
+config/prompts.yml
