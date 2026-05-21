@@ -8,3 +8,10 @@ CORS_CONFIG = {
     "allow_methods": ["*"],
     "allow_headers": ["*"],
 }
+
+ALLOWED_EXTENSIONS = {
+    "text": ["txt", "md"],
+    "file": ["pdf", "docx", "xlsx", "csv", "txt", "md"],
+    "image": ["jpg", "jpeg", "png", "webp", "gif"],
+    "video": ["mp4", "mov", "avi", "mkv"],
+}

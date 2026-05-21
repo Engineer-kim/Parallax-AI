@@ -1,0 +1,17 @@
+models:
+  - type: main
+    engine: openai
+    model: gpt-4o
+
+rails:
+  input:
+    flows:
+      - check jailbreak
+      - check toxic language
+      - check nsfw
+      - check prompt injection
+
+  output:
+    flows:
+      - check toxic language output
+      - check hallucination
