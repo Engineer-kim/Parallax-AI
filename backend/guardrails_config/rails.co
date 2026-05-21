@@ -1,70 +1,20 @@
-# ── 입력 rails ──────────────────────────────────────
+define flow self check input
+  $allowed = execute self_check_input
+  if not $allowed
+    bot refuse to respond
 
-define user attempt jailbreak
-  "ignore previous instructions"
-  "ignore all instructions"
-  "you are now"
-  "forget everything"
-  "dan mode"
-  "jailbreak"
-  "이전 지시를 무시"
-  "너는 이제"
-  "새로운 역할"
+define flow self check output
+  $allowed = execute self_check_output
+  if not $allowed
+    bot refuse to respond
 
-define flow check jailbreak
-  user attempt jailbreak
-  bot refuse jailbreak
+define flow self check hallucination
+  $allowed = execute self_check_hallucination
+  if not $allowed
+    bot inform answer might be wrong
 
-define bot refuse jailbreak
+define bot refuse to respond
   "해당 요청은 처리할 수 없습니다."
-
-# ── 프롬프트 인젝션 ──────────────────────────────────
-
-define user attempt prompt injection
-  "system prompt"
-  "act as"
-  "pretend you are"
-  "simulate"
-  "역할극"
-  "시스템 프롬프트"
-
-define flow check prompt injection
-  user attempt prompt injection
-  bot refuse prompt injection
-
-define bot refuse prompt injection
-  "해당 요청은 처리할 수 없습니다."
-
-# ── 독성 언어 (입력) ─────────────────────────────────
-
-define flow check toxic language
-  user said something toxic
-  bot refuse toxic input
-
-define bot refuse toxic input
-  "부적절한 표현이 포함되어 있습니다. 다시 시도해주세요."
-
-# ── NSFW ─────────────────────────────────────────────
-
-define flow check nsfw
-  user said something nsfw
-  bot refuse nsfw
-
-define bot refuse nsfw
-  "해당 콘텐츠는 처리할 수 없습니다."
-
-# ── 출력 rails ──────────────────────────────────────
-
-define flow check toxic language output
-  bot said something toxic
-  bot replace toxic output
-
-define bot replace toxic output
-  "응답을 생성할 수 없습니다. 다시 시도해주세요."
-
-define flow check hallucination
-  bot said something with low confidence
-  bot inform answer might be wrong
 
 define bot inform answer might be wrong
   "이 응답은 정확하지 않을 수 있습니다. 중요한 사항은 반드시 확인하세요."
