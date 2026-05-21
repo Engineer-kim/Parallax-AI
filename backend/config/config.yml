@@ -1,0 +1,16 @@
+
+# 가드레일 전 필터링
+models:
+  - type: main
+    engine: groq
+    model: llama-3.3-70b-versatile
+
+# 엔비디아에서 제공하는 NeMo
+rails:
+  input:
+    flows:
+      - self check input
+
+  output:
+    flows:
+      - self check output

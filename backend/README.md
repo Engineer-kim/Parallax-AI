@@ -4,8 +4,11 @@
 - https://guardrailsai.com/hub
 
 
-# 체크 순서
-1. Rule
-2. Groq Judge 추후 잼미니로 전환예정
-3. nemo Guardrails(NVIDIA NeMo Guardrails)
-4. 이후 로직 
+# 체크 순서(로직 흐름)
+User Input
+ ↓
+Harness
+ ↓
+NeMo Input Rails(가드레일)
+ ↓
+이후 로직

@@ -155,6 +155,95 @@
       "type": "file_ext",
       "value": ".bin",
       "severity": "block"
+    },{
+      "id": "R027",
+      "type": "regex",
+      "value": "DROP\\s+TABLE",
+      "severity": "high"
+    },
+    {
+      "id": "R028",
+      "type": "regex",
+      "value": "TRUNCATE\\s+TABLE",
+      "severity": "high"
+    },
+    {
+      "id": "R029",
+      "type": "regex",
+      "value": "ALTER\\s+TABLE",
+      "severity": "high"
+    },
+    {
+      "id": "R030",
+      "type": "regex",
+      "value": "DELETE\\s+FROM",
+      "severity": "high"
+    },
+    {
+      "id": "R031",
+      "type": "regex",
+      "value": "INSERT\\s+INTO",
+      "severity": "medium"
+    },
+    {
+      "id": "R032",
+      "type": "regex",
+      "value": "UPDATE\\s+.+SET",
+      "severity": "medium"
+    },
+    {
+      "id": "R033",
+      "type": "keyword",
+      "value": "sudo",
+      "severity": "high"
+    },
+    {
+      "id": "R034",
+      "type": "keyword",
+      "value": "chmod 777",
+      "severity": "high"
+    },
+    {
+      "id": "R035",
+      "type": "keyword",
+      "value": "take ownership",
+      "severity": "high"
+    },
+    {
+      "id": "R036",
+      "type": "keyword",
+      "value": "grant all privileges",
+      "severity": "high"
+    },
+    {
+      "id": "R037",
+      "type": "keyword",
+      "value": "rm -rf",
+      "severity": "high"
+    },
+    {
+      "id": "R038",
+      "type": "keyword",
+      "value": "wget",
+      "severity": "medium"
+    },
+    {
+      "id": "R039",
+      "type": "keyword",
+      "value": "curl",
+      "severity": "medium"
+    },
+    {
+      "id": "R040",
+      "type": "keyword",
+      "value": "bash -c",
+      "severity": "high"
+    },
+    {
+      "id": "R041",
+      "type": "keyword",
+      "value": "python -c",
+      "severity": "medium"
     }
   ],
   "settings": {
