@@ -1,0 +1,11 @@
+Application Code        harness_check        Input Rails (NeMo)          LLM (Groq)
+       |                      |                      |                       |
+       |--- user_input ------>|                      |                       |
+       |<-- return False -----| (통과!)              |                       |
+       |                                             |                       |
+       |---------------- rails.generate_async() ---->|                       |
+       |                                             |--- self_check_input ->|
+       |                                             |<-- "yes." (또는 공백)---|
+       |                                             |                       |
+       |                                             | [파싱 실패 / 차단!]   |
+       |<-- "해당 요청은 처리할 수 없습니다." -------------|                       |
