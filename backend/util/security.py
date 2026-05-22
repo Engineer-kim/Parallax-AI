@@ -1,14 +1,13 @@
+import os
 from datetime import datetime, timedelta
 
 import jwt
 from bcrypt import hashpw, gensalt, checkpw
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseMod
-from util.util import KST
-from fastapi import Depends, HTTPException, status
-
 from dotenv import load_dotenv
-import os
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from util.util import KST
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
