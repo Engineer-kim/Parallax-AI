@@ -1,5 +1,5 @@
 import time
-from models.response import ModelResult
+from schemas.response import ModelResult
 
 async def call_with_latency(name: str, coro):
     start = time.perf_counter()

@@ -2,8 +2,8 @@ from fastapi import APIRouter, status, Response
 import uuid
 import asyncio
 
-from models.request import ParallaxRequest
-from models.response import ParallaxResponse, ResponseStatus, ModelResult
+from schemas.request import ParallaxRequest
+from schemas.response import ParallaxResponse, ResponseStatus
 from services.harness_service import harness_check
 from services.llm_service import call_gpt, call_gemini, call_claude
 from services.nemo_service import rails
