@@ -1,65 +1,192 @@
-import Image from "next/image";
+'use client'
+import { useState } from 'react'
+import Sidebar from './components/Sidebar'
+import ChatInput from './components/ChatInput'
+import CylinderCarousel from './components/CylinderCarousel'
+
+interface Result {
+  model: string
+  result: string | null
+  error: string | null
+  latency_ms: number
+}
+
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+  results?: Result[]
+  selectedResult?: Result
+}
+
+interface Chat {
+  id: string
+  title: string
+  date: string
+  messages: Message[]
+}
 
 export default function Home() {
+  const [isDark, setIsDark] = useState(true)
+  const [chats, setChats] = useState<Chat[]>([])
+  const [currentId, setCurrentId] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const currentChat = chats.find(c => c.id === currentId)
+
+  const newChat = () => {
+    const id = crypto.randomUUID()
+    const chat: Chat = {
+      id,
+      title: '새 채팅',
+      date: new Date().toLocaleDateString('ko-KR'),
+      messages: [],
+    }
+    setChats(prev => [chat, ...prev])
+    setCurrentId(id)
+  }
+
+  const toggleTheme = () => {
+    setIsDark(prev => {
+      document.documentElement.setAttribute('data-theme', prev ? 'light' : 'dark')
+      return !prev
+    })
+  }
+
+  const handleSelect = (result: Result) => {
+    setChats(prev => prev.map(c => {
+      if (c.id !== currentId) return c
+      const messages = [...c.messages]
+      const lastAssistantIdx = messages.map(m => m.role).lastIndexOf('assistant')
+      if (lastAssistantIdx !== -1) {
+        messages[lastAssistantIdx] = {
+          ...messages[lastAssistantIdx],
+          selectedResult: result,
+        }
+      }
+      return { ...c, messages }
+    }))
+  }
+
+  const handleSend = async (content: string, file?: { name: string; data: string }) => {
+    let chatId = currentId
+
+    if (!chatId) {
+      const id = crypto.randomUUID()
+      const chat: Chat = {
+        id,
+        title: content.slice(0, 30),
+        date: new Date().toLocaleDateString('ko-KR'),
+        messages: [],
+      }
+      setChats(prev => [chat, ...prev])
+      setCurrentId(id)
+      chatId = id
+    }
+
+    const userMsg: Message = { role: 'user', content }
+    setChats(prev => prev.map(c => c.id === chatId ? {
+      ...c,
+      title: c.messages.length === 0 ? content.slice(0, 30) : c.title,
+      messages: [...c.messages, userMsg]
+    } : c))
+
+    setLoading(true)
+
+    try {
+      const currentMessages = chats.find(c => c.id === chatId)?.messages || []
+      const lastSelected = [...currentMessages].reverse().find(m => m.selectedResult)?.selectedResult
+
+      let finalContent = content
+      if (lastSelected?.result) {
+        finalContent = `이전 대화 맥락 (${lastSelected.model} 응답):\n${lastSelected.result}\n\n사용자 질문: ${content}`
+      }
+
+      const body: Record<string, unknown> = {
+        input_type: file ? 'file' : 'text',
+        content: finalContent,
+        ...(file && { file_name: file.name, file_data: file.data }),
+      }
+
+      const res = await fetch('http://127.0.0.1:8000/start/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      const data = await res.json()
+
+      const assistantMsg: Message = {
+        role: 'assistant',
+        content: '',
+        results: data.results,
+      }
+
+      setChats(prev => prev.map(c => c.id === chatId ? {
+        ...c,
+        messages: [...c.messages, assistantMsg]
+      } : c))
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const lastAssistantMsg = currentChat?.messages.filter(m => m.role === 'assistant').slice(-1)[0]
+  const lastResults = lastAssistantMsg?.results
+  const selectedResult = lastAssistantMsg?.selectedResult
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <Sidebar
+        chats={chats}
+        currentId={currentId}
+        onNew={newChat}
+        onSelect={setCurrentId}
+        onThemeToggle={toggleTheme}
+        isDark={isDark}
+      />
+
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: '14px', letterSpacing: '2px', color: 'var(--text-muted)' }}>
+            GPT-4o · GEMINI · CLAUDE
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {selectedResult && (
+              <div style={{ fontFamily: 'DM Mono', fontSize: '11px', color: 'var(--text-muted)', padding: '4px 10px', border: '1px solid var(--border)', borderRadius: '4px' }}>
+                {selectedResult.model.toUpperCase()} 응답 기반으로 대화 중
+              </div>
+            )}
+            {loading && (
+              <div style={{ fontFamily: 'DM Mono', fontSize: '12px', color: 'var(--text-muted)' }}>
+                응답 생성중...
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 60px' }}>
+          {!currentChat || currentChat.messages.length === 0 ? (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: '48px', letterSpacing: '-2px', marginBottom: '12px' }}>
+                PARALLAX
+              </div>
+              <div style={{ fontFamily: 'DM Mono', fontSize: '13px', color: 'var(--text-muted)' }}>
+                한 화면에서 여러 모델의 답변을 비교하고 선택하세요
+              </div>
+            </div>
+          ) : lastResults ? (
+            <CylinderCarousel
+              results={lastResults}
+              onSelect={handleSelect}
+              selectedModel={selectedResult?.model}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          ) : null}
         </div>
+
+        <ChatInput onSend={handleSend} loading={loading} />
       </main>
     </div>
-  );
+  )
 }
