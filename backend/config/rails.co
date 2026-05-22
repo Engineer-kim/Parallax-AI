@@ -4,17 +4,10 @@ define user ask something
 define bot respond
   "ok"
 
-define flow main
-  user ask something
-  bot respond
-
-
-define flow self check input
-  $allowed = execute check_llm_verdict
-
-  if not $allowed
-    bot refuse to respond
-    stop
-
 define bot refuse to respond
   "해당 요청은 처리할 수 없습니다."
+
+define flow main
+  user ask something
+  execute self_check_input
+  bot respond

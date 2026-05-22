@@ -1,3 +1,14 @@
+
+# 가드레일에서 사용할 LLM
+models:
+  - type: main
+    engine: groq
+    model: llama-3.3-70b-versatile
+    parameters:
+      temperature: 0
+      max_tokens: 500
+
+
 # 엔비디아에서 제공하는 NeMo
 rails:
   input:

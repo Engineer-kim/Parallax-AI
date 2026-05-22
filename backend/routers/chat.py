@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status, Response
 import uuid
 import asyncio
 
@@ -7,6 +7,7 @@ from models.response import ParallaxResponse, ResponseStatus, ModelResult
 from services.harness_service import harness_check
 from services.llm_service import call_gpt, call_gemini, call_claude
 from services.nemo_service import rails
+from util.check_result_after_gaurd_rail import check_if_refused_by_llm
 from util.latency import call_with_latency
 import base64
 
@@ -14,7 +15,7 @@ router = APIRouter()
 
 
 @router.post("/chat", response_model=ParallaxResponse)
-async def chat(data: ParallaxRequest):
+async def chat(data: ParallaxRequest, response: Response):
 
     request_id = str(uuid.uuid4())
 
@@ -28,6 +29,7 @@ async def chat(data: ParallaxRequest):
             pass
 
     if harness_check(user_input):
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
         return ParallaxResponse(
             status=ResponseStatus.BLOCKED,
             request_id=request_id,
@@ -39,11 +41,29 @@ async def chat(data: ParallaxRequest):
         messages=[{"role": "user", "content": user_input}]
     )
 
+    print(f"rail_result: {rail_result}")
+
     if not rail_result:
+        response.status_code = status.HTTP_400_NOT_ACCEPTABLE
         return ParallaxResponse(
             status=ResponseStatus.BLOCKED,
             request_id=request_id,
-            message="blocked by nemo",
+            message="empty response",
+            results=[]
+        )
+
+    rail_content = ""
+    if isinstance(rail_result, dict):
+        rail_content = rail_result.get("content", "")
+    elif hasattr(rail_result, "content"):
+        rail_content = rail_result.content
+
+    if await check_if_refused_by_llm(rail_content):
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return ParallaxResponse(
+            status=ResponseStatus.BLOCKED,
+            request_id=request_id,
+            message="violate req is blocked by nemo guardrail",
             results=[]
         )
 
