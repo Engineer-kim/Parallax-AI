@@ -15,6 +15,8 @@ class ParallaxRequest(BaseModel):
     content: Optional[str] = None
     file_name: Optional[str] = None
     file_data: Optional[bytes] = None
+    has_text: bool = False
+    has_file: bool = False
 
     @field_validator("content")
     @classmethod

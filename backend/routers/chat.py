@@ -1,13 +1,14 @@
 from fastapi import APIRouter
 import uuid
 import asyncio
-import time
 
 from models.request import ParallaxRequest
 from models.response import ParallaxResponse, ResponseStatus, ModelResult
 from services.harness_service import harness_check
 from services.llm_service import call_gpt, call_gemini, call_claude
 from services.nemo_service import rails
+from util.latency import call_with_latency
+import base64
 
 router = APIRouter()
 
@@ -16,9 +17,15 @@ router = APIRouter()
 async def chat(data: ParallaxRequest):
 
     request_id = str(uuid.uuid4())
-    start = time.perf_counter()
 
     user_input = data.content or ""
+
+    if data.file_data:
+        try:
+            file_text = base64.b64decode(data.file_data).decode("utf-8", errors="ignore")
+            user_input = f"{user_input}\n\n[첨부파일: {data.file_name}]\n{file_text}"
+        except Exception:
+            pass
 
     if harness_check(user_input):
         return ParallaxResponse(
@@ -42,24 +49,15 @@ async def chat(data: ParallaxRequest):
 
     clean_input = user_input
 
-    gpt_task = call_gpt(clean_input)
-    gemini_task = call_gemini(clean_input)
-    claude_task = call_claude(clean_input)
-
-    gpt, gemini, claude = await asyncio.gather(
-        gpt_task,
-        gemini_task,
-        claude_task
+    results = await asyncio.gather(
+        call_with_latency("gpt", call_gpt(clean_input)),
+        call_with_latency("gemini", call_gemini(clean_input)),
+        call_with_latency("claude", call_claude(clean_input)),
     )
-
-    latency = (time.perf_counter() - start) * 1000
 
     return ParallaxResponse(
         status=ResponseStatus.SUCCESS,
         request_id=request_id,
-        results=[
-            ModelResult(model="gpt", result=gpt, latency_ms=latency),
-            ModelResult(model="gemini", result=gemini, latency_ms=latency),
-            ModelResult(model="claude", result=claude, latency_ms=latency),
-        ]
+        results=list(results)
     )
+
