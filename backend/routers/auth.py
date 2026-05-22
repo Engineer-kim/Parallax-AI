@@ -1,9 +1,10 @@
-from fastapi import HTTPException, status, Depends, APIRouter
+from fastapi import HTTPException, status, Depends, APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from schemas.login_request import LoginRequest
 from schemas.sign_up_request import SignUpRequest
 from services.auth_service import AuthService
+from util.security import get_current_user
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
         key="access_token",
         value=token,
         httponly=True,
-        secure=True,
+        secure=False,
         samesite="lax",
         max_age=1800
     )
@@ -34,17 +35,53 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
 
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
-async def logout(auth_service: AuthService = Depends()):
-    await auth_service.logout()
+async def logout(current_user: dict = Depends(get_current_user),auth_service: AuthService = Depends()):
+
+    login_id = current_user.get("sub")
+
+    await auth_service.logout(login_id)
+
+    if not isinstance(login_id, str):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token payload"
+        )
 
     response = JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": "Logout success"}
     )
-    response.delete_cookie(
-        key="access_token",
-        httponly=True,
-        secure=True,
-        samesite="lax"
+
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return response
+
+@router.post("/refresh", status_code=status.HTTP_200_OK)
+async def refresh(request: Request,auth_service: AuthService = Depends()):
+
+    refresh_token = request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=401,
+            detail="Refresh token not found"
+        )
+
+    new_access_token = await auth_service.refresh(refresh_token)
+
+    response = JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Token refreshed"}
     )
+
+    response.set_cookie(
+        key="access_token",
+        value=new_access_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=1800
+    )
+
     return response

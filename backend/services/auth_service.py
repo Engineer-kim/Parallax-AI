@@ -7,6 +7,7 @@ from repositories.account import AccountRepository
 from models.account import Account
 from schemas.sign_up_request import SignUpRequest
 from util.security import PasswordEncoder, TokenProvider
+from util.redis import connect_redis
 
 
 class AuthService:
@@ -60,10 +61,72 @@ class AuthService:
             role=account.role
         )
 
+        refresh_token = TokenProvider.create_refresh_token(
+            subject=account.login_id
+        )
+
+        await connect_redis.set(
+            f"refresh:{account.login_id}",
+            refresh_token,
+            ex=60 * 60 * 24 * 7
+        )
+
         return {
             "access_token": access_token,
-            "token_type": "bearer",
-            "login_id": account.login_id,
-            "nickname": account.nickname,
-            "role": account.role
+            "refresh_token": refresh_token,
+            "token_type": "bearer"
         }
+
+    async def logout(self, login_id: str) -> bool:
+        await connect_redis.delete(f"refresh:{login_id}")
+        return True
+
+
+    async def refresh(self, refresh_token: str) -> str:
+
+        payload = TokenProvider.decode_token(refresh_token)
+
+        if not payload:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid refresh token"
+            )
+
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token type"
+            )
+
+        login_id = payload.get("sub")
+
+        if not isinstance(login_id, str):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token payload"
+            )
+
+        saved_refresh_token = await connect_redis.get(
+            f"refresh:{login_id}"
+        )
+
+        if saved_refresh_token != refresh_token:
+            raise HTTPException(
+                status_code=401,
+                detail="Refresh token mismatch"
+            )
+
+        account = await self.account_repository.find_by_login_id(login_id)
+
+        if not account:
+            raise HTTPException(
+                status_code=401,
+                detail="Account not found"
+            )
+
+        new_access_token = TokenProvider.create_access_token(
+            subject=account.login_id,
+            role=account.role
+        )
+
+        return new_access_token

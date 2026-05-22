@@ -14,6 +14,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 expire_minutes_raw = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(expire_minutes_raw) if expire_minutes_raw else 30
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
 
 
 class PasswordEncoder:
@@ -29,7 +30,7 @@ class TokenProvider:
     @staticmethod
     def create_access_token(subject: str, role: str) -> str:
         expire = datetime.now(KST) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        to_encode = {"sub": subject, "role": role, "exp": expire}
+        to_encode = {"sub": subject, "role": role, "exp": expire, "type": "access"}
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     @staticmethod
@@ -39,6 +40,23 @@ class TokenProvider:
             return payload
         except (jwt.PyJWTError, AttributeError):
             return None
+
+    @staticmethod
+    def create_refresh_token(subject: str) -> str:
+        expire = datetime.now(KST) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+
+        payload = {
+            "sub": subject,
+            "type": "refresh",
+            "exp": expire
+        }
+
+        return jwt.encode(
+            payload,
+            SECRET_KEY,
+            algorithm=ALGORITHM
+        )
+
 
 oauth2_scheme = HTTPBearer()
 
@@ -50,6 +68,12 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if payload.get("type") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type"
         )
     return payload
 
