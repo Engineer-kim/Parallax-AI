@@ -17,7 +17,7 @@ async def signup(request: SignUpRequest, auth_service: AuthService = Depends()):
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def login(request: LoginRequest, auth_service: AuthService = Depends()):
-    token, role, id = await auth_service.login(request)
+    token, role, id, refresh_token = await auth_service.login(request)
 
     response = JSONResponse(
         status_code=status.HTTP_200_OK,
@@ -37,6 +37,16 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
         path="/",
         domain=None
     )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=60 * 60 * 24 * 7,
+        path="/",
+        domain=None
+    )
 
     return response
 
@@ -44,7 +54,6 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
 @router.post("/logout", status_code=status.HTTP_200_OK)
 async def logout(current_user: dict = Depends(get_current_user),auth_service: AuthService = Depends()):
 
-    #하위의 값은 Accout 테이블의 ID
     account_id = current_user.get("sub")
 
     if not isinstance(account_id, str):
@@ -55,15 +64,27 @@ async def logout(current_user: dict = Depends(get_current_user),auth_service: Au
 
     await auth_service.logout(account_id)
 
-
-
     response = JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": "Logout success"}
     )
 
-    response.delete_cookie("access_token")
-    response.delete_cookie("refresh_token")
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        domain=None,
+        httponly=True,
+        secure=False,
+        samesite="lax"
+    )
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+        domain=None,
+        httponly=True,
+        secure=False,
+        samesite="lax"
+    )
 
     return response
 

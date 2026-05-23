@@ -6,6 +6,7 @@ from bcrypt import hashpw, gensalt, checkpw
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Request
 
 from util.util import KST
 
@@ -60,14 +61,21 @@ class TokenProvider:
 
 oauth2_scheme = HTTPBearer()
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)) -> dict:
-    token = credentials.credentials
+
+def get_current_user(request: Request) -> dict:
+    token = request.cookies.get("access_token")
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token not found"
+        )
+
     payload = TokenProvider.decode_token(token)
     if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"token": "Bearer"},
+            detail="Invalid or expired token"
         )
 
     if payload.get("type") != "access":
@@ -75,6 +83,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type"
         )
+
     return payload
 
 class RoleChecker:
