@@ -17,13 +17,14 @@ async def signup(request: SignUpRequest, auth_service: AuthService = Depends()):
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def login(request: LoginRequest, auth_service: AuthService = Depends()):
-    token, role = await auth_service.login(request)
+    token, role, id = await auth_service.login(request)
 
     response = JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
             "message": "Login success",
-            "role": role
+            "role": role,
+            "account_id": id
         }
     )
     response.set_cookie(
@@ -32,8 +33,11 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=1800
+        max_age=1800,
+        path="/",
+        domain=None
     )
+
     return response
 
 

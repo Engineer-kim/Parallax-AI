@@ -71,7 +71,7 @@ class AuthService:
             ex=60 * 60 * 24 * 7
         )
 
-        return access_token, account.role
+        return access_token, account.role, account.id
 
     async def logout(self, account_id: str) -> bool:
         await connect_redis.delete(f"refresh:{account_id}")

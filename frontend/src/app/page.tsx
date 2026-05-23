@@ -1,262 +1,40 @@
 'use client'
-import { useState, useRef, useEffect, useCallback } from 'react'
 import Sidebar from './components/Sidebar'
 import ChatInput from './components/ChatInput'
 import CylinderCarousel from './components/CylinderCarousel'
 import LoginModal from './components/LoginModal'
-import { sendChatRequest, logout } from '@/lib/api'
-import { getAccessToken, getAccountIdFromToken } from '@/lib/util/auth'
 import styles from './page.module.css'
-import type { Base64File, Chat, Message, Result, BackendRequest } from '@/lib/types'
 import { MODEL_COLORS, MODEL_LABELS } from '@/lib/constants'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { useChatManager } from '@/lib/hooks/useChatManager'
+import { useTheme } from '@/lib/hooks/useTheme'
 
 export default function Home() {
-  const [isDark, setIsDark] = useState(true)
-  const [chats, setChats] = useState<Chat[]>([])
-  const [currentId, setCurrentId] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [expandedResults, setExpandedResults] = useState<number | null>(null)
-  const [showLoginModal, setShowLoginModal] = useState(false)
+  const { isDark, toggleTheme } = useTheme()
+  const { accountId, setAccountId, showLoginModal, setShowLoginModal, loading, handleLogout } = useAuth()
+  const { chats, currentId, setCurrentId, currentChat, error, setError, expandedResults, setExpandedResults, messagesEndRef, lastAssistantIdx, newChat, handleSelect, handleSend } = useChatManager()
 
-  const [accessToken, setAccessToken] = useState<string | null>(null)
-  const [accountId, setAccountId] = useState<number | null>(null)
-  const [authChecked, setAuthChecked] = useState(false)
+  const isLoggedIn = accountId !== null
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  const currentChat = chats.find(c => c.id === currentId)
-
-  useEffect(() => {
-    window.requestAnimationFrame(() => {
-      const token = getAccessToken()
-      if (token) {
-        setAccessToken(token)
-        const id = getAccountIdFromToken(token)
-        setAccountId(id)
-      }
-      setAuthChecked(true)
-    })
-  }, [])
-
-  useEffect(() => {
-    const handleFocus = () => {
-      const token = getAccessToken()
-      if (token) {
-        setAccessToken(token)
-        const id = getAccountIdFromToken(token)
-        setAccountId(id)
-      } else {
-        setAccessToken(null)
-        setAccountId(null)
-      }
-    }
-    window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
-  }, [])
-
-  const scrollToBottom = useCallback(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [currentChat?.messages.length, scrollToBottom])
-
-
-  const newChat = () => {
-    const id = crypto.randomUUID()
-    const chat: Chat = {
-      id,
-      title: 'new chat',
-      date: new Date().toLocaleDateString('ko-KR'),
-      messages: [],
-    }
-    setChats(prev => [chat, ...prev])
-    setCurrentId(id)
-    setError(null)
-    setExpandedResults(null)
-  }
-
-  const toggleTheme = () => {
-    setIsDark(prev => {
-      document.documentElement.setAttribute('data-theme', prev ? 'light' : 'dark')
-      return !prev
-    })
-  }
-
-  const handleSelect = (result: Result, messageIndex: number) => {
-    setChats(prev => prev.map(c => {
-      if (c.id !== currentId) return c
-      const messages = [...c.messages]
-      if (messageIndex >= 0 && messageIndex < messages.length && messages[messageIndex].role === 'assistant') {
-        messages[messageIndex] = {
-          ...messages[messageIndex],
-          selectedResult: result,
-        }
-      }
-      return { ...c, messages }
-    }))
-  }
-
-  const handleLogout = async () => {
-    setLoading(true)
-    try {
-      await logout()
-      setAccessToken(null)
-      setAccountId(null)
-      setError(null)
-    } catch (e) {
-      const errMsg = e instanceof Error ? e.message : '로그아웃 중 오류가 발생했습니다.'
-      setError(errMsg)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSend = async (content: string, file?: Base64File) => {
-    if (!accessToken) {
-      setError('로그인이 필요합니다. 먼저 로그인해주세요.')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSendMessage = async (content: string, file?: any) => {
+    if (!isLoggedIn) {
+      setError('로그인이 필요합니다.')
       setShowLoginModal(true)
       return false
     }
-
-    let chatId = currentId
-    setError(null)
-
-    if (!chatId) {
-      const id = crypto.randomUUID()
-      const chat: Chat = {
-        id,
-        title: content.slice(0, 30),
-        date: new Date().toLocaleDateString('ko-KR'),
-        messages: [],
-      }
-      setChats(prev => [chat, ...prev])
-      setCurrentId(id)
-      chatId = id
-    }
-
-    const currentMessages = chats.find(c => c.id === chatId)?.messages || []
-    const userMsgCount = currentMessages.filter(m => m.role === 'user').length
-    const inputOrder = userMsgCount + 1
-
-    const lastSelectedResult = [...currentMessages]
-      .reverse()
-      .find(m => m.selectedResult)?.selectedResult
-
-    let finalContent = content
-    if (lastSelectedResult?.result) {
-      finalContent = `이전 대화 맥락 (${lastSelectedResult.model} 응답):\n${lastSelectedResult.result}\n\n사용자 질문: ${content}`
-    }
-
-    const hasFile = !!file
-    const hasText = !!content.trim()
-
-    let contentType: 'text' | 'file' | 'image' | 'video' = 'text'
-    if (file) {
-      const ext = file.name.split('.').pop()?.toLowerCase() || ''
-      if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
-        contentType = 'image'
-      } else if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) {
-        contentType = 'video'
-      } else {
-        contentType = 'file'
-      }
-    }
-
-    const userMsg: Message = {
-      role: 'user',
-      content,
-    }
-
-    setChats(prev => prev.map(c => c.id === chatId ? {
-      ...c,
-      title: c.messages.length === 0 ? content.slice(0, 30) : c.title,
-      messages: [...c.messages, userMsg]
-    } : c))
-
-    setLoading(true)
-
-    try {
-      const body: BackendRequest = {
-        session_id: null,
-        input_order: inputOrder,
-        selected_model: lastSelectedResult?.model || null,
-        content_type: contentType,
-        content: finalContent,
-        file_name: file?.name || null,
-        file_url: null,
-        mime_type: null,
-        file_data: file?.data || null,
-        has_text: hasText,
-        has_file: hasFile,
-        account_id: accountId,
-      }
-
-      const data = await sendChatRequest(body, accessToken)
-
-      if (data.status === 'blocked') {
-        setError(data.message || '요청이 차단되었습니다.')
-        const blockedMsg: Message = {
-          role: 'assistant',
-          content: data.message || '요청이 차단되었습니다.',
-          results: [],
-        }
-        setChats(prev => prev.map(c => c.id === chatId ? {
-          ...c,
-          messages: [...c.messages, blockedMsg]
-        } : c))
-        return true
-      }
-
-      const assistantMsg: Message = {
-        role: 'assistant',
-        content: '',
-        results: data.results.map(r => ({
-          model: r.model,
-          result: r.result,
-          error: r.error,
-          latency_ms: r.latency_ms ?? 0,
-        })),
-      }
-
-      setChats(prev => prev.map(c => c.id === chatId ? {
-        ...c,
-        messages: [...c.messages, assistantMsg]
-      } : c))
-
-      const updatedChat = chats.find(c => c.id === chatId)
-      const newIdx = (updatedChat?.messages.length ?? 0) + 1
-      setExpandedResults(newIdx)
-      return true
-
-    } catch (e) {
-      if (e instanceof Error && e.message === 'AUTH_EXPIRED') {
-        setAccessToken(null)
-        setAccountId(null)
-        setError('인증이 만료되었습니다. 다시 로그인해주세요.')
-        setShowLoginModal(true)
-      } else {
-        const errMsg = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.'
-        setError(errMsg)
-      }
-      console.error('Chat error:', e)
-      return false
-    } finally {
-      setLoading(false)
-    }
+    return handleSend(content, file, accountId)
   }
 
-  const lastAssistantIdx = currentChat?.messages
-    ? currentChat.messages.map(m => m.role).lastIndexOf('assistant')
-    : -1
+  const handleLoginSuccess = (id: number) => {
+    setAccountId(id)
+    setShowLoginModal(false)
+  }
 
-  if (!authChecked) return null
-
-  const isLoggedIn = !!accessToken && accountId !== null
+  const handleLogoutClick = async () => {
+    await handleLogout()
+    setError(null)
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -264,7 +42,11 @@ export default function Home() {
         chats={chats}
         currentId={currentId}
         onNew={newChat}
-        onSelect={(id) => { setCurrentId(id); setError(null); setExpandedResults(null) }}
+        onSelect={id => {
+          setCurrentId(id)
+          setError(null)
+          setExpandedResults(null)
+        }}
         onThemeToggle={toggleTheme}
         isDark={isDark}
         isLoggedIn={isLoggedIn}
@@ -273,22 +55,33 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.header}>
           <div className={styles.branding}>GPT-4o · GEMINI · CLAUDE</div>
+
           <div className={styles.headerRight}>
             <div className={`${styles.statusBlock} ${isLoggedIn ? styles.loggedIn : styles.loggedOut}`}>
               <span className={`${styles.statusDot} ${isLoggedIn ? '' : styles.loggedOut}`} />
               {isLoggedIn ? `인증됨 (ID: ${accountId})` : '로그인 필요'}
             </div>
 
-            {isLoggedIn && (
+            {isLoggedIn ? (
               <button
                 type="button"
                 className={styles.headerButton}
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
                 disabled={loading}
               >
                 로그아웃
               </button>
-            )}
+            ) : (
+              <button
+                type="button"
+                className={styles.headerButton}
+                onClick={() => setShowLoginModal(true)}
+                disabled={loading}
+              >
+                로그인
+              </button>
+            )
+            }
 
             {loading && (
               <div className={styles.loadingStatus}>
@@ -306,6 +99,20 @@ export default function Home() {
               <div className={styles.welcomeText}>
                 한 번의 질문으로 GPT, Gemini, Claude의 답변을 동시에 비교하세요
               </div>
+
+              {!isLoggedIn && (
+                <div className={styles.loginHint}>
+                  채팅을 시작하려면{' '}
+                  <button
+                    className={styles.loginHintButton}
+                    onClick={() => setShowLoginModal(true)}
+                  >
+                    로그인
+                  </button>
+                  이 필요합니다
+                </div>
+              )}
+
               <div className={styles.buttonGroup}>
                 {(['gpt', 'gemini', 'claude'] as const).map(model => (
                   <div
@@ -322,7 +129,6 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
           ) : (
             <div className={styles.chatList}>
               {currentChat.messages.map((msg, idx) => {
@@ -336,12 +142,11 @@ export default function Home() {
 
                 if (msg.role === 'assistant') {
                   const results = msg.results || []
+
                   if (results.length === 0 && msg.content) {
                     return (
                       <div key={idx} className={styles.assistantRow}>
-                        <div className={styles.assistantAlertBubble}>
-                          ⚠️ {msg.content}
-                        </div>
+                        <div className={styles.assistantAlertBubble}>⚠️ {msg.content}</div>
                       </div>
                     )
                   }
@@ -356,33 +161,17 @@ export default function Home() {
                           <div className={styles.metaInfo}>
                             <span className={styles.metaDot} />
                             {results.length}개 모델 응답
-                            {msg.selectedResult && (
-                              <span
-                                className={styles.metaBadge}
-                                style={{
-                                  color: MODEL_COLORS[msg.selectedResult.model] || 'var(--text)',
-                                  border: `1px solid ${MODEL_COLORS[msg.selectedResult.model] || 'var(--border)'}44`,
-                                }}
-                              >
-                                {MODEL_LABELS[msg.selectedResult.model] || msg.selectedResult.model} 선택됨
-                              </span>
-                            )}
                           </div>
                         </div>
-
                         <div className={styles.carouselContainer}>
                           <CylinderCarousel
                             results={results}
-                            onSelect={(result) => handleSelect(result, idx)}
+                            onSelect={result => handleSelect(result, idx)}
                             selectedModel={msg.selectedResult?.model}
                           />
                         </div>
-
                         {!isLastAssistant && (
-                          <button
-                            onClick={() => setExpandedResults(null)}
-                            className={styles.collapseButton}
-                          >
+                          <button onClick={() => setExpandedResults(null)} className={styles.collapseButton}>
                             ▲ 접기
                           </button>
                         )}
@@ -393,29 +182,12 @@ export default function Home() {
                   if (results.length > 0 && !isExpanded) {
                     return (
                       <div key={idx} className={styles.assistantRow}>
-                        <button
-                          onClick={() => setExpandedResults(idx)}
-                          className={styles.summaryButton}
-                        >
-                          <div className={styles.summaryDots}>
-                            {results.map(r => (
-                              <div
-                                key={r.model}
-                                className={styles.summaryDot}
-                                style={{
-                                  background: r.error ? '#ff6b6b' : (MODEL_COLORS[r.model] || '#888'),
-                                  borderColor: msg.selectedResult?.model === r.model
-                                    ? MODEL_COLORS[r.model] : 'transparent',
-                                }}
-                              />
-                            ))}
-                          </div>
+                        <button onClick={() => setExpandedResults(idx)} className={styles.summaryButton}>
                           <span className={styles.summaryText}>
                             {msg.selectedResult
-                              ? `${MODEL_LABELS[msg.selectedResult.model] || msg.selectedResult.model} 응답 선택됨`
-                              : `${results.length}개 모델 응답 보기`}
+                              ? `선택됨: ${msg.selectedResult.model}`
+                              : `${results.length}개 응답 보기`}
                           </span>
-                          <span className={styles.summaryArrow}>▼</span>
                         </button>
                       </div>
                     )
@@ -426,27 +198,6 @@ export default function Home() {
 
                 return null
               })}
-
-
-              {loading && (
-                <div className={styles.loadingRow}>
-                  <div className={styles.loadingCard}>
-                    <div className={styles.loadingDots}>
-                      {[0, 1, 2].map(i => (
-                        <span
-                          key={i}
-                          className={styles.loadingDot}
-                          style={{
-                            background: [MODEL_COLORS.gpt, MODEL_COLORS.gemini, MODEL_COLORS.claude][i],
-                            animationDelay: `${i * 0.16}s`,
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span className={styles.summaryText}>3개 모델이 응답 생성 중...</span>
-                  </div>
-                </div>
-              )}
 
               {error && !loading && (
                 <div className={styles.errorRow}>
@@ -459,9 +210,14 @@ export default function Home() {
           )}
         </div>
 
-        <ChatInput onSend={handleSend} loading={loading} />
+        <ChatInput onSend={handleSendMessage} loading={loading} />
 
-        {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
+        {showLoginModal && (
+          <LoginModal 
+            onClose={() => setShowLoginModal(false)} 
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
       </main>
     </div>
   )
