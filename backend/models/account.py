@@ -1,11 +1,10 @@
 from sqlalchemy import Column, BigInteger, String, Text, DateTime, Enum as SQLEnum
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
 from enums.auth_enum import Auth
+from models.base import Base
 from util.util import KST
 
-Base = declarative_base()
 
 
 class Account(Base):
