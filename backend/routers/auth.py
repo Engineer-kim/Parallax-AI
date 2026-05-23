@@ -21,7 +21,10 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
 
     response = JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"message": "Login success"}
+        content={
+            "message": "Login success",
+            "role": role
+        }
     )
     response.set_cookie(
         key="access_token",

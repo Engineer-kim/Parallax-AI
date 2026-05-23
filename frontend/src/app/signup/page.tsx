@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { signup } from '@/lib/api'
+import { signup, login } from '@/lib/api'
 
 export default function SignupPage() {
   const router = useRouter()
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
+  const [loginId, setLoginId] = useState('')
+  const [nickname, setNickname] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -19,8 +19,9 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      await signup({ email, password, full_name: fullName || undefined })
-      router.push('/login')
+      await signup({ login_id: loginId, password, nickname })
+      await login({ login_id: loginId, password })
+      router.replace('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : '회원가입에 실패했습니다.')
     } finally {
@@ -42,21 +43,22 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
           <label style={{ display: 'grid', gap: '8px', fontFamily: 'DM Mono', fontSize: '12px', color: 'var(--text-muted)' }}>
-            이름
+            로그인 아이디
             <input
               type="text"
-              value={fullName}
-              onChange={e => setFullName(e.target.value)}
+              value={loginId}
+              onChange={e => setLoginId(e.target.value)}
+              required
               style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
             />
           </label>
 
           <label style={{ display: 'grid', gap: '8px', fontFamily: 'DM Mono', fontSize: '12px', color: 'var(--text-muted)' }}>
-            이메일
+            닉네임
             <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="text"
+              value={nickname}
+              onChange={e => setNickname(e.target.value)}
               required
               style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
             />

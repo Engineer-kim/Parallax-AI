@@ -34,7 +34,7 @@ class AuthService:
         saved_account = await self.account_repository.save(new_account)
         return saved_account
 
-    async def login(self, request: LoginRequest) -> dict:
+    async def login(self, request: LoginRequest) -> tuple:
         account = await self.account_repository.find_by_login_id(
             request.login_id
         )
@@ -71,11 +71,7 @@ class AuthService:
             ex=60 * 60 * 24 * 7
         )
 
-        return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "token_type": "bearer"
-        }
+        return access_token, account.role
 
     async def logout(self, account_id: str) -> bool:
         await connect_redis.delete(f"refresh:{account_id}")

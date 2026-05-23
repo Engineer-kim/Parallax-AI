@@ -29,7 +29,7 @@ class PasswordEncoder:
 class TokenProvider:
     @staticmethod
     def create_access_token(subject: str, role: str) -> str:
-        expire = datetime.now(KST) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = KST() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode = {"sub": subject, "role": role, "exp": expire, "type": "access"}
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -43,7 +43,7 @@ class TokenProvider:
 
     @staticmethod
     def create_refresh_token(subject: str) -> str:
-        expire = datetime.now(KST) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = KST() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
         payload = {
             "sub": subject,

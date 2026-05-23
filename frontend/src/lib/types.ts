@@ -21,13 +21,13 @@ export interface BackendRequest {
 }
 
 export interface SignUpRequest {
-  email: string
+  login_id: string
   password: string
-  full_name?: string
+  nickname: string
 }
 
 export interface LoginRequest {
-  email: string
+  login_id: string
   password: string
 }
 

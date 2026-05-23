@@ -119,8 +119,8 @@ class ChatService:
                 )
 
         results = await asyncio.gather(
-            execute_model("gpt", call_gpt),
-            execute_model("gemini", call_gemini),
+            # execute_model("gpt", call_gpt),
+            # execute_model("gemini", call_gemini),
             execute_model("claude", call_claude),
             return_exceptions=False
         )

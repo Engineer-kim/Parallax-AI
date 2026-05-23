@@ -7,7 +7,7 @@ import { login } from '@/lib/api'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [loginId, setLoginId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -18,8 +18,8 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await login({ email, password })
-      router.push('/')
+      await login({ login_id: loginId, password })
+      router.replace('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : '로그인에 실패했습니다.')
     } finally {
@@ -41,11 +41,11 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
           <label style={{ display: 'grid', gap: '8px', fontFamily: 'DM Mono', fontSize: '12px', color: 'var(--text-muted)' }}>
-            이메일
+            로그인 아이디
             <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="text"
+              value={loginId}
+              onChange={e => setLoginId(e.target.value)}
               required
               style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
             />
