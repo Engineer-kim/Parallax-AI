@@ -3,27 +3,8 @@ import { useState } from 'react'
 import Sidebar from './components/Sidebar'
 import ChatInput from './components/ChatInput'
 import CylinderCarousel from './components/CylinderCarousel'
-
-interface Result {
-  model: string
-  result: string | null
-  error: string | null
-  latency_ms: number
-}
-
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-  results?: Result[]
-  selectedResult?: Result
-}
-
-interface Chat {
-  id: string
-  title: string
-  date: string
-  messages: Message[]
-}
+import { startChat } from '@/lib/chatApi'
+import type { Base64File, Chat, Message, Result, StartChatPayload } from '@/lib/types'
 
 export default function Home() {
   const [isDark, setIsDark] = useState(true)
@@ -67,7 +48,7 @@ export default function Home() {
     }))
   }
 
-  const handleSend = async (content: string, file?: { name: string; data: string }) => {
+  const handleSend = async (content: string, file?: Base64File) => {
     let chatId = currentId
 
     if (!chatId) {
@@ -101,19 +82,13 @@ export default function Home() {
         finalContent = `이전 대화 맥락 (${lastSelected.model} 응답):\n${lastSelected.result}\n\n사용자 질문: ${content}`
       }
 
-      const body: Record<string, unknown> = {
+      const body: StartChatPayload = {
         input_type: file ? 'file' : 'text',
         content: finalContent,
         ...(file && { file_name: file.name, file_data: file.data }),
       }
 
-      const res = await fetch('http://127.0.0.1:8000/start/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-
-      const data = await res.json()
+      const data = await startChat(body)
 
       const assistantMsg: Message = {
         role: 'assistant',

@@ -2,15 +2,11 @@
 import { useState, useRef } from 'react'
 import { Send, Paperclip, X } from 'lucide-react'
 import styles from './ChatInput.module.css'
-
-interface ChatInputProps {
-  onSend: (content: string, file?: { name: string; data: string }) => void
-  loading: boolean
-}
+import type { Base64File, ChatInputProps } from '@/lib/types'
 
 export default function ChatInput({ onSend, loading }: ChatInputProps) {
   const [text, setText] = useState('')
-  const [file, setFile] = useState<{ name: string; data: string } | null>(null)
+  const [file, setFile] = useState<Base64File | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {

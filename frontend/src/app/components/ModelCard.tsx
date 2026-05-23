@@ -1,15 +1,6 @@
 'use client'
 import styles from './ModelCard.module.css'
-
-interface ModelCardProps {
-  model: string
-  result: string | null
-  error: string | null
-  latency: number
-  isCenter: boolean
-  isSelected: boolean
-  onSelect: () => void
-}
+import type { ModelCardProps } from '@/lib/types'
 
 const MODEL_COLORS: Record<string, string> = {
   gpt: '#10a37f',

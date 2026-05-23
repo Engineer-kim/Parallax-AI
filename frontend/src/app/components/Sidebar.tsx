@@ -2,21 +2,7 @@
 import { useState } from 'react'
 import { Plus, Search, MessageSquare, Sun, Moon } from 'lucide-react'
 import styles from './Sidebar.module.css'
-
-interface Chat {
-  id: string
-  title: string
-  date: string
-}
-
-interface SidebarProps {
-  chats: Chat[]
-  currentId: string
-  onNew: () => void
-  onSelect: (id: string) => void
-  onThemeToggle: () => void
-  isDark: boolean
-}
+import type { SidebarProps } from '@/lib/types'
 
 export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeToggle, isDark }: SidebarProps) {
   const [search, setSearch] = useState('')

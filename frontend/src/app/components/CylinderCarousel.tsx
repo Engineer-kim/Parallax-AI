@@ -3,19 +3,7 @@ import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import ModelCard from './ModelCard'
 import styles from './CylinderCarousel.module.css'
-
-interface Result {
-  model: string
-  result: string | null
-  error: string | null
-  latency_ms: number
-}
-
-interface CylinderCarouselProps {
-  results: Result[]
-  onSelect: (result: Result) => void
-  selectedModel?: string
-}
+import type { CylinderCarouselProps } from '@/lib/types'
 
 export default function CylinderCarousel({ results, onSelect, selectedModel }: CylinderCarouselProps) {
   const [current, setCurrent] = useState(0)
