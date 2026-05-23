@@ -67,7 +67,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
+            headers={"token": "Bearer"},
         )
 
     if payload.get("type") != "access":
