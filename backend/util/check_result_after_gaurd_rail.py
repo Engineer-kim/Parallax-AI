@@ -19,15 +19,34 @@ async def check_if_refused_by_llm(nemo_output: str) -> bool:
             정답(TRUE 또는 FALSE):"""
 
     try:
+
         response = await rails.llm.ainvoke(prompt)
+
         if hasattr(response, "content"):
             result_text = response.content
+
         elif isinstance(response, dict):
             result_text = response.get("content", "")
+
         else:
             result_text = str(response)
 
-        return "TRUE" in result_text.upper()
+        normalized = (
+            result_text
+            .strip()
+            .upper()
+        )
+
+        if normalized == "TRUE":
+            return True
+
+        if normalized == "FALSE":
+            return False
+
+        return False
+
     except Exception as e:
+
         print(f"Filter LLM Error: {e}")
+
         return True

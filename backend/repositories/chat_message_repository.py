@@ -1,22 +1,24 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from models.chat_message import ChatMessage
 
 
 class ChatMessageRepository:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def create(
+    async def create(
         self,
         session_id: int,
         role: str,
         input_order: int,
-        selected_model: str,
+        selected_model: str | None,
         content_type: str,
-        content: str = None,
-        file_url: str = None,
-        mime_type: str = None
+        content: str | None = None,
+        file_url: str | None = None,
+        mime_type: str | None = None
     ):
 
         message = ChatMessage(
@@ -31,62 +33,70 @@ class ChatMessageRepository:
         )
 
         self.db.add(message)
-        self.db.commit()
-        self.db.refresh(message)
+
+        await self.db.commit()
+
+        await self.db.refresh(message)
 
         return message
 
-    def find_by_id(self, message_id: int):
+    async def find_by_id(
+        self,
+        message_id: int
+    ):
 
-        return (
-            self.db.query(ChatMessage)
-            .filter(ChatMessage.id == message_id)
-            .first()
+        result = await self.db.execute(
+            select(ChatMessage).where(
+                ChatMessage.id == message_id
+            )
         )
 
-    def find_by_session_id(self, session_id: int):
+        return result.scalars().first()
 
-        return (
-            self.db.query(ChatMessage)
-            .filter(ChatMessage.session_id == session_id)
+    async def find_by_session_id(
+        self,
+        session_id: int
+    ):
+
+        result = await self.db.execute(
+            select(ChatMessage)
+            .where(ChatMessage.session_id == session_id)
             .order_by(ChatMessage.input_order.asc())
-            .all()
         )
 
-    def update_selected_model(
+        return result.scalars().all()
+
+    async def update_selected_model(
         self,
         message_id: int,
         selected_model: str
     ):
 
-        message = (
-            self.db.query(ChatMessage)
-            .filter(ChatMessage.id == message_id)
-            .first()
-        )
+        message = await self.find_by_id(message_id)
 
         if not message:
             return None
 
         message.selected_model = selected_model
 
-        self.db.commit()
-        self.db.refresh(message)
+        await self.db.commit()
+
+        await self.db.refresh(message)
 
         return message
 
-    def delete(self, message_id: int):
+    async def delete(
+        self,
+        message_id: int
+    ):
 
-        message = (
-            self.db.query(ChatMessage)
-            .filter(ChatMessage.id == message_id)
-            .first()
-        )
+        message = await self.find_by_id(message_id)
 
         if not message:
             return False
 
-        self.db.delete(message)
-        self.db.commit()
+        await self.db.delete(message)
+
+        await self.db.commit()
 
         return True

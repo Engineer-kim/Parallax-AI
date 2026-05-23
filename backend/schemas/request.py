@@ -16,7 +16,7 @@ class ParallaxRequest(BaseModel):
 
     input_order: int
 
-    selected_model: str
+    selected_model: Optional[str] = None
 
     content_type: ContentType
 
