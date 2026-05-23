@@ -73,6 +73,7 @@ export interface SidebarProps {
   onSelect: (id: string) => void
   onThemeToggle: () => void
   isDark: boolean
+  isLoggedIn: boolean
 }
 
 export interface ModelCardProps {
@@ -92,6 +93,6 @@ export interface CylinderCarouselProps {
 }
 
 export interface ChatInputProps {
-  onSend: (content: string, file?: Base64File) => void
+  onSend: (content: string, file?: Base64File) => Promise<boolean>
   loading: boolean
 }

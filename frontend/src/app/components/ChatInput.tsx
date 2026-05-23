@@ -20,11 +20,13 @@ export default function ChatInput({ onSend, loading }: ChatInputProps) {
     reader.readAsDataURL(f)
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!text.trim() || loading) return
-    onSend(text, file || undefined)
-    setText('')
-    setFile(null)
+    const cleared = await onSend(text, file || undefined)
+    if (cleared) {
+      setText('')
+      setFile(null)
+    }
   }
 
   return (

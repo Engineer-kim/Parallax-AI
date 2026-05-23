@@ -48,6 +48,11 @@
   gap: 8px;
 }
 
+.newChatButtonDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .searchContainer {
   padding: 0 20px 12px;
 }

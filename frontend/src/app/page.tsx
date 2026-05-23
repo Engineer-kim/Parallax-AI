@@ -38,8 +38,6 @@ function getAccountIdFromToken(token: string): number | null {
   return Number.isNaN(id) ? null : id
 }
 
-/* ───────── API 호출 ───────── */
-
 async function sendChatRequest(
   body: BackendRequest,
   token: string
@@ -67,8 +65,6 @@ async function sendChatRequest(
   return res.json()
 }
 
-/* ───────── 상수 ───────── */
-
 const MODEL_COLORS: Record<string, string> = {
   gpt: '#10a37f',
   gemini: '#4285f4',
@@ -81,7 +77,6 @@ const MODEL_LABELS: Record<string, string> = {
   claude: 'Claude',
 }
 
-/* ───────── 메인 컴포넌트 ───────── */
 
 export default function Home() {
   const [isDark, setIsDark] = useState(true)
@@ -90,8 +85,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [expandedResults, setExpandedResults] = useState<number | null>(null)
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
-  // 인증 상태
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [accountId, setAccountId] = useState<number | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
@@ -100,18 +95,18 @@ export default function Home() {
 
   const currentChat = chats.find(c => c.id === currentId)
 
-  /* ── 쿠키에서 토큰 읽어서 account_id 추출 ── */
   useEffect(() => {
-    const token = getAccessToken()
-    if (token) {
-      setAccessToken(token)
-      const id = getAccountIdFromToken(token)
-      setAccountId(id)
-    }
-    setAuthChecked(true)
+    window.requestAnimationFrame(() => {
+      const token = getAccessToken()
+      if (token) {
+        setAccessToken(token)
+        const id = getAccountIdFromToken(token)
+        setAccountId(id)
+      }
+      setAuthChecked(true)
+    })
   }, [])
 
-  // 주기적으로 토큰 갱신 체크 (포커스 시)
   useEffect(() => {
     const handleFocus = () => {
       const token = getAccessToken()
@@ -138,7 +133,6 @@ export default function Home() {
     scrollToBottom()
   }, [currentChat?.messages.length, scrollToBottom])
 
-  /* ── 채팅 관리 ── */
 
   const newChat = () => {
     const id = crypto.randomUUID()
@@ -175,13 +169,13 @@ export default function Home() {
     }))
   }
 
-  /* ── 메시지 전송 ── */
+
 
   const handleSend = async (content: string, file?: Base64File) => {
-    // 인증 확인
     if (!accessToken || accountId === null) {
       setError('로그인이 필요합니다. 먼저 로그인해주세요.')
-      return
+      setShowLoginModal(true)
+      return false
     }
 
     let chatId = currentId
@@ -270,7 +264,7 @@ export default function Home() {
           ...c,
           messages: [...c.messages, blockedMsg]
         } : c))
-        return
+        return true
       }
 
       const assistantMsg: Message = {
@@ -292,31 +286,31 @@ export default function Home() {
       const updatedChat = chats.find(c => c.id === chatId)
       const newIdx = (updatedChat?.messages.length ?? 0) + 1
       setExpandedResults(newIdx)
+      return true
 
     } catch (e) {
       if (e instanceof Error && e.message === 'AUTH_EXPIRED') {
         setAccessToken(null)
         setAccountId(null)
         setError('인증이 만료되었습니다. 다시 로그인해주세요.')
+        setShowLoginModal(true)
       } else {
         const errMsg = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.'
         setError(errMsg)
       }
       console.error('Chat error:', e)
+      return false
     } finally {
       setLoading(false)
     }
   }
 
-  /* ── 마지막 assistant 인덱스 ── */
   const lastAssistantIdx = currentChat?.messages
     ? currentChat.messages.map(m => m.role).lastIndexOf('assistant')
     : -1
 
-  /* ── 인증 체크 완료 전 ── */
   if (!authChecked) return null
 
-  /* ── 로그인 안 된 상태 ── */
   const isLoggedIn = !!accessToken && accountId !== null
 
   return (
@@ -328,10 +322,10 @@ export default function Home() {
         onSelect={(id) => { setCurrentId(id); setError(null); setExpandedResults(null) }}
         onThemeToggle={toggleTheme}
         isDark={isDark}
+        isLoggedIn={isLoggedIn}
       />
 
       <main className={styles.main}>
-        {/* Header */}
         <div className={styles.header}>
           <div className={styles.branding}>GPT-4o · GEMINI · CLAUDE</div>
           <div className={styles.headerRight}>
@@ -349,23 +343,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Chat Area */}
         <div className={styles.chatArea}>
-          {!isLoggedIn ? (
-            /* ── 로그인 필요 화면 ── */
-            <div className={styles.centeredPane}>
-              <div className={styles.heroTitle}>PARALLAX</div>
-              <div className={styles.alertCard}>
-                <div className={styles.alertCardTitle}>🔒 로그인이 필요합니다</div>
-                <div className={styles.alertCardText}>
-                  채팅을 사용하려면 먼저 로그인해주세요.<br />
-                  로그인 후 이 페이지를 새로고침하면 자동으로 인증됩니다.
-                </div>
-              </div>
-            </div>
-
-          ) : !currentChat || currentChat.messages.length === 0 ? (
-            /* ── 웰컴 화면 ── */
+          {!currentChat || currentChat.messages.length === 0 ? (
             <div className={styles.welcomeCard}>
               <div className={styles.heroTitle}>PARALLAX</div>
               <div className={styles.welcomeText}>
@@ -389,10 +368,8 @@ export default function Home() {
             </div>
 
           ) : (
-            /* ── 대화 히스토리 ── */
             <div className={styles.chatList}>
               {currentChat.messages.map((msg, idx) => {
-                /* 사용자 메시지 */
                 if (msg.role === 'user') {
                   return (
                     <div key={idx} className={styles.userRow}>
@@ -401,11 +378,8 @@ export default function Home() {
                   )
                 }
 
-                /* 어시스턴트 메시지 */
                 if (msg.role === 'assistant') {
                   const results = msg.results || []
-
-                  /* 차단된 응답 */
                   if (results.length === 0 && msg.content) {
                     return (
                       <div key={idx} className={styles.assistantRow}>
@@ -419,7 +393,6 @@ export default function Home() {
                   const isLastAssistant = idx === lastAssistantIdx
                   const isExpanded = expandedResults === idx || isLastAssistant
 
-                  /* 펼쳐진 캐러셀 */
                   if (results.length > 0 && isExpanded) {
                     return (
                       <div key={idx} className={styles.chatList}>
@@ -461,7 +434,6 @@ export default function Home() {
                     )
                   }
 
-                  /* 접힌 요약 버튼 */
                   if (results.length > 0 && !isExpanded) {
                     return (
                       <div key={idx} className={styles.assistantRow}>
@@ -499,7 +471,8 @@ export default function Home() {
                 return null
               })}
 
-              {/* 로딩 인디케이터 */}
+
+
               {loading && (
                 <div className={styles.loadingRow}>
                   <div className={styles.loadingCard}>
@@ -520,7 +493,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* 에러 표시 */}
               {error && !loading && (
                 <div className={styles.errorRow}>
                   <div className={styles.errorBubble}>⚠️ {error}</div>
@@ -532,12 +504,25 @@ export default function Home() {
           )}
         </div>
 
-        {/* 채팅 입력 - 로그인 시에만 활성화 */}
-        {isLoggedIn ? (
-          <ChatInput onSend={handleSend} loading={loading} />
-        ) : (
-          <div className={styles.chatInputFallback}>
-            채팅을 사용하려면 로그인이 필요합니다
+        <ChatInput onSend={handleSend} loading={loading} />
+
+        {showLoginModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+              <div className={styles.modalHeader}>로그인이 필요합니다</div>
+              <div className={styles.modalText}>
+                채팅을 보내려면 로그인해야 합니다. 로그인 후 페이지를 새로고침하거나
+                다시 시도해주세요.
+              </div>
+              <div className={styles.modalActions}>
+                <button
+                  className={styles.modalButton}
+                  onClick={() => setShowLoginModal(false)}
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>

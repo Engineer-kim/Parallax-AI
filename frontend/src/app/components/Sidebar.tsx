@@ -4,7 +4,7 @@ import { Plus, Search, MessageSquare, Sun, Moon } from 'lucide-react'
 import styles from './Sidebar.module.css'
 import type { SidebarProps } from '@/lib/types'
 
-export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeToggle, isDark }: SidebarProps) {
+export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeToggle, isDark, isLoggedIn }: SidebarProps) {
   const [search, setSearch] = useState('')
 
   const filtered = chats.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
@@ -18,7 +18,11 @@ export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeTogg
       </div>
       
       <div className={styles.newChatButtonContainer}>
-        <button onClick={onNew} className={styles.newChatButton}>
+        <button
+          onClick={isLoggedIn ? onNew : undefined}
+          disabled={!isLoggedIn}
+          className={`${styles.newChatButton} ${!isLoggedIn ? styles.newChatButtonDisabled : ''}`}
+        >
           <Plus size={15} /> 새 채팅
         </button>
       </div>
