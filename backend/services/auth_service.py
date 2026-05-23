@@ -57,16 +57,16 @@ class AuthService:
             )
 
         access_token = TokenProvider.create_access_token(
-            subject=account.login_id,
+            subject=str(account.id),
             role=account.role
         )
 
         refresh_token = TokenProvider.create_refresh_token(
-            subject=account.login_id
+            subject=str(account.id)
         )
 
         await connect_redis.set(
-            f"refresh:{account.login_id}",
+            f"refresh:{account.id}",
             refresh_token,
             ex=60 * 60 * 24 * 7
         )
@@ -77,8 +77,8 @@ class AuthService:
             "token_type": "bearer"
         }
 
-    async def logout(self, login_id: str) -> bool:
-        await connect_redis.delete(f"refresh:{login_id}")
+    async def logout(self, account_id: str) -> bool:
+        await connect_redis.delete(f"refresh:{account_id}")
         return True
 
 
@@ -98,16 +98,16 @@ class AuthService:
                 detail="Invalid token type"
             )
 
-        login_id = payload.get("sub")
+        account_id = payload.get("sub")
 
-        if not isinstance(login_id, str):
+        if not isinstance(account_id, str):
             raise HTTPException(
                 status_code=401,
                 detail="Invalid token payload"
             )
 
         saved_refresh_token = await connect_redis.get(
-            f"refresh:{login_id}"
+            f"refresh:{account_id}"
         )
 
         if saved_refresh_token != refresh_token:
@@ -116,7 +116,7 @@ class AuthService:
                 detail="Refresh token mismatch"
             )
 
-        account = await self.account_repository.find_by_login_id(login_id)
+        account = await self.account_repository.find_by_account_id(account_id)
 
         if not account:
             raise HTTPException(
@@ -125,7 +125,7 @@ class AuthService:
             )
 
         new_access_token = TokenProvider.create_access_token(
-            subject=account.login_id,
+            subject=str(account.id),
             role=account.role
         )
 

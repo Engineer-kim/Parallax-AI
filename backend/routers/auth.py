@@ -37,15 +37,18 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
 @router.post("/logout", status_code=status.HTTP_200_OK)
 async def logout(current_user: dict = Depends(get_current_user),auth_service: AuthService = Depends()):
 
-    login_id = current_user.get("sub")
+    #하위의 값은 Accout 테이블의 ID
+    account_id = current_user.get("sub")
 
-    await auth_service.logout(login_id)
-
-    if not isinstance(login_id, str):
+    if not isinstance(account_id, str):
         raise HTTPException(
             status_code=401,
             detail="Invalid token payload"
         )
+
+    await auth_service.logout(account_id)
+
+
 
     response = JSONResponse(
         status_code=status.HTTP_200_OK,
