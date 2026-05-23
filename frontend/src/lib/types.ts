@@ -5,6 +5,35 @@ export interface Result {
   latency_ms: number
 }
 
+export interface BackendRequest {
+  session_id: number | null
+  input_order: number
+  selected_model: string | null
+  content_type: 'text' | 'file' | 'image' | 'video'
+  content: string | null
+  file_name: string | null
+  file_url: string | null
+  mime_type: string | null
+  file_data: string | null
+  has_text: boolean
+  has_file: boolean
+  account_id: number
+}
+
+export interface BackendModelResult {
+  model: string
+  result: string | null
+  error: string | null
+  latency_ms: number | null
+}
+
+export interface BackendResponse {
+  status: 'success' | 'error' | 'blocked'
+  request_id: string
+  results: BackendModelResult[]
+  message: string | null
+}
+
 export interface Message {
   role: 'user' | 'assistant'
   content: string
