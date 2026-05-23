@@ -1,0 +1,106 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 14, 23, 0.65);
+  padding: 28px;
+}
+
+.content {
+  width: min(520px, 100%);
+  border-radius: 24px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.22);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.header {
+  font-family: Syne;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.description {
+  margin: 0;
+  font-family: 'DM Mono';
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+
+.subText {
+  margin: 0;
+  font-family: 'DM Mono';
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-family: 'DM Mono';
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.primaryButton {
+  background: #10a37f;
+  color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 12px 30px rgba(16, 163, 127, 0.18);
+}
+
+.primaryButton:hover {
+  transform: translateY(-1px);
+  background: #0e946c;
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.closeButton {
+  align-self: flex-end;
+  margin-top: 4px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  font-family: 'DM Mono';
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.24);
+}

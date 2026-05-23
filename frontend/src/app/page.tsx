@@ -3,80 +3,12 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Sidebar from './components/Sidebar'
 import ChatInput from './components/ChatInput'
 import CylinderCarousel from './components/CylinderCarousel'
+import LoginModal from './components/LoginModal'
+import { sendChatRequest, logout } from '@/lib/api'
+import { getAccessToken, getAccountIdFromToken } from '@/lib/util/auth'
 import styles from './page.module.css'
-import type { Base64File, Chat, Message, Result, BackendRequest, BackendResponse } from '@/lib/types'
-
-const API_BASE = 'http://127.0.0.1:8000'
-
-/* ───────── JWT / 쿠키 유틸 ───────── */
-
-function getAccessToken(): string | null {
-  if (typeof document === 'undefined') return null
-  const match = document.cookie.match(/(?:^|;\s*)access_token=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) : null
-}
-
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) return null
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
-    const json = atob(padded)
-    return JSON.parse(json)
-  } catch {
-    return null
-  }
-}
-
-function getAccountIdFromToken(token: string): number | null {
-  const payload = decodeJwtPayload(token)
-  if (!payload) return null
-  const sub = payload.sub
-  if (sub === undefined || sub === null) return null
-  const id = Number(sub)
-  return Number.isNaN(id) ? null : id
-}
-
-async function sendChatRequest(
-  body: BackendRequest,
-  token: string
-): Promise<BackendResponse> {
-  const res = await fetch(`${API_BASE}/start/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    credentials: 'include',
-    body: JSON.stringify(body),
-  })
-
-  if (res.status === 401) {
-    throw new Error('AUTH_EXPIRED')
-  }
-
-  if (!res.ok) {
-    const errBody = await res.json().catch(() => null)
-    const detail = errBody?.detail || errBody?.message || `${res.status} ${res.statusText}`
-    throw new Error(detail)
-  }
-
-  return res.json()
-}
-
-const MODEL_COLORS: Record<string, string> = {
-  gpt: '#10a37f',
-  gemini: '#4285f4',
-  claude: '#d4a574',
-}
-
-const MODEL_LABELS: Record<string, string> = {
-  gpt: 'GPT-4o',
-  gemini: 'Gemini',
-  claude: 'Claude',
-}
-
+import type { Base64File, Chat, Message, Result, BackendRequest } from '@/lib/types'
+import { MODEL_COLORS, MODEL_LABELS } from '@/lib/constants'
 
 export default function Home() {
   const [isDark, setIsDark] = useState(true)
@@ -138,7 +70,7 @@ export default function Home() {
     const id = crypto.randomUUID()
     const chat: Chat = {
       id,
-      title: '새 채팅',
+      title: 'new chat',
       date: new Date().toLocaleDateString('ko-KR'),
       messages: [],
     }
@@ -169,10 +101,23 @@ export default function Home() {
     }))
   }
 
-
+  const handleLogout = async () => {
+    setLoading(true)
+    try {
+      await logout()
+      setAccessToken(null)
+      setAccountId(null)
+      setError(null)
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : '로그아웃 중 오류가 발생했습니다.'
+      setError(errMsg)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSend = async (content: string, file?: Base64File) => {
-    if (!accessToken || accountId === null) {
+    if (!accessToken) {
       setError('로그인이 필요합니다. 먼저 로그인해주세요.')
       setShowLoginModal(true)
       return false
@@ -334,6 +279,17 @@ export default function Home() {
               {isLoggedIn ? `인증됨 (ID: ${accountId})` : '로그인 필요'}
             </div>
 
+            {isLoggedIn && (
+              <button
+                type="button"
+                className={styles.headerButton}
+                onClick={handleLogout}
+                disabled={loading}
+              >
+                로그아웃
+              </button>
+            )}
+
             {loading && (
               <div className={styles.loadingStatus}>
                 <span className={styles.loadingPulse} />
@@ -472,7 +428,6 @@ export default function Home() {
               })}
 
 
-
               {loading && (
                 <div className={styles.loadingRow}>
                   <div className={styles.loadingCard}>
@@ -506,25 +461,7 @@ export default function Home() {
 
         <ChatInput onSend={handleSend} loading={loading} />
 
-        {showLoginModal && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-              <div className={styles.modalHeader}>로그인이 필요합니다</div>
-              <div className={styles.modalText}>
-                채팅을 보내려면 로그인해야 합니다. 로그인 후 페이지를 새로고침하거나
-                다시 시도해주세요.
-              </div>
-              <div className={styles.modalActions}>
-                <button
-                  className={styles.modalButton}
-                  onClick={() => setShowLoginModal(false)}
-                >
-                  닫기
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
       </main>
     </div>
   )

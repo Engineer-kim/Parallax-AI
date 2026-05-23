@@ -17,7 +17,22 @@ export interface BackendRequest {
   file_data: string | null
   has_text: boolean
   has_file: boolean
-  account_id: number
+  account_id: number | null
+}
+
+export interface SignUpRequest {
+  email: string
+  password: string
+  full_name?: string
+}
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface AuthResponse {
+  message: string
 }
 
 export interface BackendModelResult {
