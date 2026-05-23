@@ -1,15 +1,13 @@
 import asyncio
 import time
 
-from repositories.chat_message_repository import ChatMessageRepository
 from repositories.ai_response_repository import AIResponseRepository
+from repositories.chat_message_repository import ChatMessageRepository
 from repositories.chat_session_repository import ChatSessionRepository
-
 from schemas.response import ModelResult
-
-from services.llm_service import call_gpt
-from services.llm_service import call_gemini
 from services.llm_service import call_claude
+from services.llm_service import call_gemini
+from services.llm_service import call_gpt
 
 
 class ChatService:
@@ -22,6 +20,7 @@ class ChatService:
 
     async def save_user_message(
         self,
+        account_id: int,
         session_id: int,
         role: str,
         input_order: int,
@@ -32,9 +31,9 @@ class ChatService:
         mime_type: str | None = None
     ):
 
-        if not session_id:
+        if not session_id or session_id == 0 or session_id is None:
             session = await self.chat_session_repository.create(
-                account_id=1,
+                account_id=account_id,
                 title="새 채팅"
             )
 

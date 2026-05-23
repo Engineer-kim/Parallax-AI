@@ -12,7 +12,7 @@ class ContentType(str, Enum):
 
 class ParallaxRequest(BaseModel):
 
-    session_id: int
+    session_id: int | None = None
 
     input_order: int
 
@@ -33,6 +33,8 @@ class ParallaxRequest(BaseModel):
     has_text: bool = False
 
     has_file: bool = False
+
+    account_id: int #계정 정보를 식별하는 어카운트테이블의 PK => 이게 로그인 아니디ㅣ랑 매치 , 로그인 아이디 노출 방지
 
     @field_validator("content")
     @classmethod
