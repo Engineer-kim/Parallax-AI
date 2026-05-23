@@ -8,6 +8,7 @@ import base64
 
 from sqlalchemy.orm import Session
 
+from enums.auth_enum import Auth
 from schemas.request import ParallaxRequest
 from schemas.response import ParallaxResponse, ModelResult
 from schemas.response import ResponseStatus
@@ -106,7 +107,7 @@ async def chat(data: ParallaxRequest,response: Response,db: Session = Depends(co
 
     message = await chat_service.save_user_message(
         session_id=data.session_id,
-        role="user",
+        role=Auth.ROLE_USER,
         input_order=data.input_order,
         selected_model=data.selected_model,
         content_type=data.content_type,

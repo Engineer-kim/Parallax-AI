@@ -4,6 +4,8 @@ import time
 from repositories.chat_message_repository import ChatMessageRepository
 from repositories.ai_response_repository import AIResponseRepository
 
+from schemas.response import ModelResult
+
 from services.llm_service import call_gpt
 from services.llm_service import call_gemini
 from services.llm_service import call_claude
@@ -43,48 +45,64 @@ class ChatService:
         self,
         message_id: int,
         prompt: str
-    ):
+    ) -> list[ModelResult]:
 
-        started = time.perf_counter()
+        async def execute_model(
+            model_name: str,
+            func
+        ) -> ModelResult:
 
-        gpt_task = call_gpt(prompt)
-        gemini_task = call_gemini(prompt)
-        claude_task = call_claude(prompt)
+            started = time.perf_counter()
 
-        gpt_result, gemini_result, claude_result = await asyncio.gather(
-            gpt_task,
-            gemini_task,
-            claude_task
+            try:
+
+                result = await func(prompt)
+
+                latency = int(
+                    (time.perf_counter() - started) * 1000
+                )
+
+                self.ai_response_repository.create(
+                    message_id=message_id,
+                    model=model_name,
+                    content=result,
+                    latency_ms=latency,
+                    error=None
+                )
+
+                return ModelResult(
+                    model=model_name,
+                    result=result,
+                    latency_ms=latency
+                )
+
+            except Exception as e:
+
+                latency = int(
+                    (time.perf_counter() - started) * 1000
+                )
+
+                self.ai_response_repository.create(
+                    message_id=message_id,
+                    model=model_name,
+                    content=None,
+                    latency_ms=latency,
+                    error=str(e)
+                )
+
+                return ModelResult(
+                    model=model_name,
+                    error=str(e),
+                    latency_ms=latency
+                )
+
+        results = await asyncio.gather(
+            execute_model("gpt", call_gpt),
+            execute_model("gemini", call_gemini),
+            execute_model("claude", call_claude)
         )
 
-        latency = int((time.perf_counter() - started) * 1000)
-
-        self.ai_response_repository.create(
-            message_id=message_id,
-            model="gpt",
-            content=gpt_result,
-            latency_ms=latency
-        )
-
-        self.ai_response_repository.create(
-            message_id=message_id,
-            model="gemini",
-            content=gemini_result,
-            latency_ms=latency
-        )
-
-        self.ai_response_repository.create(
-            message_id=message_id,
-            model="claude",
-            content=claude_result,
-            latency_ms=latency
-        )
-
-        return {
-            "gpt": gpt_result,
-            "gemini": gemini_result,
-            "claude": claude_result
-        }
+        return results
 
     async def select_model(
         self,
@@ -127,6 +145,7 @@ class ChatService:
                     {
                         "model": response.model,
                         "content": response.content,
+                        "error": response.error,
                         "latency_ms": response.latency_ms
                     }
                     for response in responses

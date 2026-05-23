@@ -20,6 +20,8 @@ class AIResponse(Base):
 
     latency_ms = Column(Integer)
 
+    error = Column(Text)
+
     created_at = Column(
         TIMESTAMP,
         nullable=False,
