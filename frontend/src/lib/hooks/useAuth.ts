@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { logout } from '@/lib/api'
+import { blockHistoryNavigation } from '../util/historyDelete'
 
 export function useAuth(initialAccountId: number | null) {
   const [accountId, setAccountId] = useState<number | null>(initialAccountId)
@@ -10,6 +11,7 @@ export function useAuth(initialAccountId: number | null) {
   const handleLogout = useCallback(async () => {
     setLoading(true)
     await logout()
+    blockHistoryNavigation()
     setAccountId(null)
     setError(null)
     setLoading(false)

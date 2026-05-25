@@ -8,8 +8,18 @@ import styles from '../page.module.css'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useChatManager } from '@/lib/hooks/useChatManager'
 import { useTheme } from '@/lib/hooks/useTheme'
+import { blockHistoryNavigation } from '@/lib/util/historyDelete'
+import { useEffect } from 'react'
 
 export default function HomeClient({ initialAccountId }: { initialAccountId: number | null }) {
+
+  useEffect(() => {
+    const cleanup = blockHistoryNavigation()
+
+    return cleanup
+  }, [])
+
+
   const { isDark, toggleTheme } = useTheme()
   const { accountId, setAccountId, showLoginModal, setShowLoginModal, loading, handleLogout } =
     useAuth(initialAccountId)
