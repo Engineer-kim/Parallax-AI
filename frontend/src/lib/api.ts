@@ -4,6 +4,7 @@ import type {
   BackendResponse,
   LoginRequest,
   SignUpRequest,
+  UserSettings,
 } from '@/lib/types'
 
 const API_BASE = 'http://localhost:8000'
@@ -164,4 +165,26 @@ export async function refreshAccessToken(): Promise<AuthResponse> {
   }
 
   return res.json()
+}
+
+export async function savePersonalizationSettings(settings: UserSettings): Promise<void> {
+  try {
+    const res = await fetch('/personalization/save', {
+      method: 'POST',
+      headers: buildJsonHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(settings),
+    })
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => null)
+      const detail = getServerErrorMessage(errBody, `${res.status}`)
+      throw new Error(detail)
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error(translateNetworkError(error))
+  }
 }

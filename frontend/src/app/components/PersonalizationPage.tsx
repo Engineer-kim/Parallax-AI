@@ -4,19 +4,8 @@ import { useState } from 'react'
 import { ArrowLeft, Settings, Bell, Palette, Shield, Zap } from 'lucide-react'
 import Link from 'next/link'
 import styles from '../personalization/page.module.css'
-
-interface UserSettings {
-  theme: 'dark' | 'light'
-  notifications: boolean
-  emailNotifications: boolean
-  modelPreferences: string[]
-  defaultLanguage: 'ko' | 'en'
-  autoSave: boolean
-}
-
-interface PersonalizationPageProps {
-  accountId: number | null
-}
+import { PersonalizationPageProps, UserSettings } from '@/lib/types'
+import { savePersonalizationSettings } from '@/lib/api'
 
 export default function PersonalizationClient({ accountId }: PersonalizationPageProps) {
   const [settings, setSettings] = useState<UserSettings>({
@@ -47,23 +36,12 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
 
   const handleSave = async () => {
     try {
-      const response = await fetch('/api/personalization/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(settings),
-      })
-
-      if (response.ok) {
-        alert('설정이 저장되었습니다.')
-      } else {
-        alert('설정 저장에 실패했습니다.')
-      }
+      await savePersonalizationSettings(settings)
+      alert('설정이 저장되었습니다.')
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '설정 저장 중 오류가 발생했습니다.'
       console.error('설정 저장 오류:', error)
-      alert('설정 저장 중 오류가 발생했습니다.')
+      alert(errorMessage)
     }
   }
 

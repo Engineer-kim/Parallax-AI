@@ -111,3 +111,16 @@ export interface ChatInputProps {
   onSend: (content: string, file?: Base64File) => Promise<boolean>
   loading: boolean
 }
+
+export interface UserSettings {
+  theme: 'dark' | 'light'
+  notifications: boolean
+  emailNotifications: boolean
+  modelPreferences: string[]
+  defaultLanguage: 'ko' | 'en'
+  autoSave: boolean
+}
+
+export interface PersonalizationPageProps {
+  accountId: number | null
+}
