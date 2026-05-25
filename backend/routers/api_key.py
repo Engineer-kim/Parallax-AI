@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
 
-from schemas.api_key_schema import ApiKeyRequest, ApiKeyResponse
+from schemas.api_key_req_res import ApiKeyRequest, ApiKeyResponse
 from repositories.user_api_key_repository import UserApiKeyRepository
 from util.database import connect_db
 from util.auth_middleware import get_current_account_id

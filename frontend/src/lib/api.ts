@@ -188,3 +188,27 @@ export async function savePersonalizationSettings(settings: UserSettings): Promi
     throw new Error(translateNetworkError(error))
   }
 }
+
+// API 키 저장, 삭제 함수
+export async function saveApiKey(model: string, apiKey: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/keys/save`, {
+    method: 'POST',
+    headers: {
+       'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({ model, api_key: apiKey }),
+  })
+  if (!res.ok) throw new Error('API 키 저장 실패')
+}
+
+export async function deleteApiKey(model: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/keys/${model}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('API 키 삭제 실패')
+}
