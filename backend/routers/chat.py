@@ -118,9 +118,11 @@ async def chat(data: ParallaxRequest,response: Response,db: Session = Depends(co
         mime_type=data.mime_type
     )
 
+
     ai_results = await chat_service.process_ai_response(
         message_id=message.id,
-        prompt=user_input
+        prompt=user_input,
+        account_id=data.account_id,
     )
 
     return ParallaxResponse(

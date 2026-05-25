@@ -2,7 +2,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from models import Base, Account, ChatSession, ChatMessage, AIResponse
+from models import Base, Account, ChatSession, ChatMessage, AIResponse, UserApiKey
 
 load_dotenv()
 

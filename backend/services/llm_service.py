@@ -1,21 +1,24 @@
 import os
+
+from fastapi import HTTPException, status
 from openai import AsyncOpenAI
 import httpx
 from openai.types.chat import ChatCompletionUserMessageParam
-from dotenv import load_dotenv
-
-load_dotenv()
+# from dotenv import load_dotenv
+#
+# load_dotenv()
 # openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-async def call_gpt(prompt: str):
-    key = os.getenv("GPT_KEY")
-    if not key:
-        raise ValueError(
-            "키가 설정되지 않았습니다. .env 파일을 확인하세요.(G)"
+async def call_gpt(prompt: str, api_key: str):
+    # key = os.getenv("GPT_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="키가 설정되지 않았습니다. 설정을 확인하세요.(GPT)"
         )
 
-    openai_client = AsyncOpenAI(api_key=key)
+    openai_client = AsyncOpenAI(api_key=api_key)
 
     user_message: ChatCompletionUserMessageParam = {
         "role": "user",
@@ -31,13 +34,14 @@ async def call_gpt(prompt: str):
     return res.choices[0].message.content
 
 
-async def call_gemini(prompt: str):
-    key = os.getenv("GEMINI_API_KEY")
-    if not key:
-        raise ValueError(
-            "키가 설정되지 않았습니다. .env 파일을 확인하세요.(G)"
+async def call_gemini(prompt: str, api_key: str):
+    # key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail = "키가 설정되지 않았습니다. 설정을 확인하세요.(GEMINI)"
         )
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
 
     payload = {
         "contents": [
@@ -59,16 +63,17 @@ async def call_gemini(prompt: str):
 
 
 
-async def call_claude(prompt: str):
-    key = os.getenv("CLAUDE_KEY")
-    if not key:
-        raise ValueError(
-            "키가 설정되지 않았습니다. .env 파일을 확인하세요.(C)"
+async def call_claude(prompt: str, api_key: str):
+    # key = os.getenv("CLAUDE_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail = "키가 설정되지 않았습니다. 설정을 확인하세요.(CLAUDE)"
         )
     url = "https://api.anthropic.com/v1/messages"
 
     headers = {
-        "x-api-key": key,
+        "x-api-key": api_key,
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
     }

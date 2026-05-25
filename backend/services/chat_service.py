@@ -1,13 +1,16 @@
 import asyncio
 import time
 
+from models.user_api_key import UserApiKey
 from repositories.ai_response_repository import AIResponseRepository
 from repositories.chat_message_repository import ChatMessageRepository
 from repositories.chat_session_repository import ChatSessionRepository
+from repositories.user_api_key_repository import UserApiKeyRepository
 from schemas.response import ModelResult
 from services.llm_service import call_claude
 from services.llm_service import call_gemini
 from services.llm_service import call_gpt
+from fastapi import HTTPException, status
 
 
 class ChatService:
@@ -17,6 +20,7 @@ class ChatService:
         self.chat_message_repository = ChatMessageRepository(db)
         self.ai_response_repository = AIResponseRepository(db)
         self.chat_session_repository = ChatSessionRepository(db)
+        self.user_api_key_repository = UserApiKeyRepository(db)
 
     async def save_user_message(
         self,
@@ -64,19 +68,29 @@ class ChatService:
     async def process_ai_response(
         self,
         message_id: int,
-        prompt: str
+        prompt: str,
+        account_id: int,
     ) -> list[ModelResult]:
+
+        user_keys = self.user_api_key_repository.find_by_account_id(account_id)
+
+        if not user_keys:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="등록된 API 키가 아무것도 없습니다."
+            )
 
         async def execute_model(
             model_name: str,
-            func
+            func,
+            api_key: str
         ) -> ModelResult:
 
             started = time.perf_counter()
 
             try:
 
-                result = await func(prompt)
+                result = await func(prompt, api_key)
 
                 latency = int(
                     (time.perf_counter() - started) * 1000
@@ -118,12 +132,15 @@ class ChatService:
                     latency_ms=latency
                 )
 
-        results = await asyncio.gather(
-            # execute_model("gpt", call_gpt),
-            # execute_model("gemini", call_gemini),
-            execute_model("claude", call_claude),
-            return_exceptions=False
-        )
+        tasks = []
+        if "gpt" in user_keys:
+            tasks.append(execute_model("gpt", call_gpt, user_keys["gpt"]))
+        if "gemini" in user_keys:
+            tasks.append(execute_model("gemini", call_gemini, user_keys["gemini"]))
+        if "claude" in user_keys:
+            tasks.append(execute_model("claude", call_claude, user_keys["claude"]))
+
+        results = await asyncio.gather(*tasks, return_exceptions=False)
 
         return list(results)
 
