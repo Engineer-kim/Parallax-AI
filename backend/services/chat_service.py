@@ -5,7 +5,7 @@ from models.user_api_key import UserApiKey
 from repositories.ai_response_repository import AIResponseRepository
 from repositories.chat_message_repository import ChatMessageRepository
 from repositories.chat_session_repository import ChatSessionRepository
-from repositories.user_api_key_repository import UserApiKeyRepository
+from repositories.api_key_repository import ApiKeyRepository
 from schemas.response import ModelResult
 from services.llm_service import call_claude
 from services.llm_service import call_gemini
@@ -20,7 +20,7 @@ class ChatService:
         self.chat_message_repository = ChatMessageRepository(db)
         self.ai_response_repository = AIResponseRepository(db)
         self.chat_session_repository = ChatSessionRepository(db)
-        self.user_api_key_repository = UserApiKeyRepository(db)
+        self.user_api_key_repository = ApiKeyRepository(db)
 
     async def save_user_message(
         self,

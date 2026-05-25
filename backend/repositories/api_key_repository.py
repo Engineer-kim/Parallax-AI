@@ -4,7 +4,7 @@ from models.user_api_key import UserApiKey
 from util.crypto import encrypt
 
 
-class UserApiKeyRepository:
+class ApiKeyRepository:
 
     def __init__(self, db: AsyncSession):
         self.db = db
