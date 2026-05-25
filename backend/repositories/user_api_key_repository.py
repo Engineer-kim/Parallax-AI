@@ -1,28 +1,39 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from models.user_api_key import UserApiKey
 from util.crypto import encrypt
 
 
 class UserApiKeyRepository:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def find_by_account_id(self, account_id: int) -> dict:
+    async def find_by_account_id(self, account_id: int) -> dict:
         rows = (
-            self.db.query(UserApiKey)
-            .filter(UserApiKey.account_id == account_id)
+            (
+                await self.db.execute(
+                    select(UserApiKey)
+                    .filter(UserApiKey.account_id == account_id)
+                )
+            )
+            .scalars()
             .all()
         )
         return {row.model: row.api_key for row in rows}
 
-    def upsert(self, account_id: int, model: str, api_key: str) -> UserApiKey:
+    async def upsert(self, account_id: int, model: str, api_key: str) -> UserApiKey:
         row = (
-            self.db.query(UserApiKey)
-            .filter(
-                UserApiKey.account_id == account_id,
-                UserApiKey.model == model
+            (
+                await self.db.execute(
+                    select(UserApiKey)
+                    .filter(
+                        UserApiKey.account_id == account_id,
+                        UserApiKey.model == model
+                    )
+                )
             )
+            .scalars()
             .first()
         )
         if row:
@@ -35,29 +46,38 @@ class UserApiKeyRepository:
             )
             self.db.add(row)
 
-        self.db.commit()
-        self.db.refresh(row)
+        await self.db.commit()
+        await self.db.refresh(row)
         return row
 
-    def delete(self, account_id: int, model: str) -> bool:
+    async def delete(self, account_id: int, model: str) -> bool:
         row = (
-            self.db.query(UserApiKey)
-            .filter(
-                UserApiKey.account_id == account_id,
-                UserApiKey.model == model
+            (
+                await self.db.execute(
+                    select(UserApiKey)
+                    .filter(
+                        UserApiKey.account_id == account_id,
+                        UserApiKey.model == model
+                    )
+                )
             )
+            .scalars()
             .first()
         )
         if not row:
             return False
-        self.db.delete(row)
-        self.db.commit()
+        await self.db.delete(row)
+        await self.db.commit()
         return True
 
-    def find_registered_models(self, account_id: int) -> list[str]:
+    async def find_registered_models(self, account_id: int) -> list[str]:
         rows = (
-            self.db.query(UserApiKey.model)
-            .filter(UserApiKey.account_id == account_id)
+            (
+                await self.db.execute(
+                    select(UserApiKey.model)
+                    .filter(UserApiKey.account_id == account_id)
+                )
+            )
             .all()
         )
         return [row.model for row in rows]

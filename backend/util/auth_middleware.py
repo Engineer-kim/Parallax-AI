@@ -10,6 +10,12 @@ ALGORITHM = os.getenv("ALGORITHM")
 
 class AuthFilterMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+
+        #Preflight 허용(브라우저 확인용 요청)
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
+
         if request.url.path.startswith("/start/chat") or request.url.path.startswith("/keys"):
 
             token = None
