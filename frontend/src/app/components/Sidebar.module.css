@@ -140,6 +140,30 @@
   gap: 8px;
 }
 
+.personalizationButton {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  font-size: 12px;
+  font-family: 'DM Mono';
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.personalizationButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
 .themeButton {
   flex: 1;
   padding: 10px;
@@ -152,4 +176,19 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  min-width: 32px;
+  font-size: 12px;
+  font-family: 'DM Mono';
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.themeButton:hover {
+  background: var(--bg-card);
+  border-color: var(--text-muted);
+}
+
+.themeButton[href] {
+  padding: 10px;
+  flex: 0;
 }

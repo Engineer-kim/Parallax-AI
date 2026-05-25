@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Search, MessageSquare, Sun, Moon } from 'lucide-react'
+import { Plus, Search, MessageSquare, Sun, Moon, Settings } from 'lucide-react'
 import styles from './Sidebar.module.css'
+import Link from 'next/link'
 import type { SidebarProps } from '@/lib/types'
 
 export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeToggle, isDark, isLoggedIn }: SidebarProps) {
@@ -62,6 +63,12 @@ export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeTogg
       </div>
 
       <div className={styles.footerContainer}>
+        {isLoggedIn && (
+          <Link href="/personalization" className={styles.personalizationButton} title="개인화 설정">
+            <Settings size={16} />
+            <span>설정</span>
+          </Link>
+        )}
         <button onClick={onThemeToggle} className={styles.themeButton}>
           {isDark ? <Sun size={13} /> : <Moon size={13} />}
           {isDark ? '라이트 모드' : '다크 모드'}
