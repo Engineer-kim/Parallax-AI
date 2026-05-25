@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import CORS_CONFIG
-from routers import test, chat, auth
+from routers import test, chat, auth, api_key
 
 from dotenv import load_dotenv
 import os
@@ -20,3 +20,5 @@ app.add_middleware(AuthFilterMiddleware)
 app.include_router(test.router, prefix="/server")
 app.include_router(chat.router, prefix="/start")
 app.include_router(auth.router, prefix="/session")
+
+app.include_router(api_key.router, prefix="/keys")
