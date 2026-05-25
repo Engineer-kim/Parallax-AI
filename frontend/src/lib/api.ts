@@ -6,7 +6,7 @@ import type {
   SignUpRequest,
 } from '@/lib/types'
 
-const API_BASE = '/api'
+const API_BASE = 'http://localhost:8000'
 
 function buildJsonHeaders() {
   return {
