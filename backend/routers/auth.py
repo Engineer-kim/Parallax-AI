@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status, Depends, APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from config import IS_PROD
 from schemas.login_request import LoginRequest
 from schemas.sign_up_request import SignUpRequest
 from services.auth_service import AuthService
@@ -31,8 +32,8 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
         key="access_token",
         value=token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=IS_PROD,
+        samesite="none" if IS_PROD else "lax",
         max_age=1800,
         path="/",
         domain=None
@@ -41,8 +42,8 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=IS_PROD,
+        samesite="none" if IS_PROD else "lax",
         max_age=60 * 60 * 24 * 7,
         path="/",
         domain=None
@@ -74,16 +75,16 @@ async def logout(current_user: dict = Depends(get_current_user),auth_service: Au
         path="/",
         domain=None,
         httponly=True,
-        secure=False,
-        samesite="lax"
+        secure=IS_PROD,
+        samesite="none" if IS_PROD else "lax"
     )
     response.delete_cookie(
         key="refresh_token",
         path="/",
         domain=None,
         httponly=True,
-        secure=False,
-        samesite="lax"
+        secure=IS_PROD,
+        samesite="none" if IS_PROD else "lax"
     )
 
     return response
@@ -110,8 +111,8 @@ async def refresh(request: Request,auth_service: AuthService = Depends()):
         key="access_token",
         value=new_access_token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=IS_PROD,
+        samesite="none" if IS_PROD else "lax",
         max_age=1800
     )
 
