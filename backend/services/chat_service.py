@@ -111,7 +111,7 @@ class ChatService:
 
                 error_msg = str(e)
 
-                if "401" in error_msg:
+                if "401" in error_msg or "400" in error_msg:
                     error_msg = f"{model_name.upper()} API 키가 올바르지 않습니다. 설정에서 확인해주세요."
 
                 return ModelResult(

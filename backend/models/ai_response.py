@@ -16,7 +16,7 @@ class AIResponse(Base):
 
     model = Column(VARCHAR(50), nullable=False)
 
-    content = Column(Text, nullable=False)
+    content = Column(Text, nullable=True)
 
     latency_ms = Column(Integer)
 

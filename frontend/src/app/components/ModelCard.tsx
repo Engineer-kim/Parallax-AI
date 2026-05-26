@@ -57,11 +57,25 @@ export default function ModelCard({ model, result, error, latency, isCenter, isS
       <div className={styles.divider} />
 
       <div className={styles.content} style={{ color: error ? '#ff6b6b' : 'var(--text)' }}>
-        <div className={styles.contentText}>
+        {/* <div className={styles.contentText}>
           {error ? `오류: ${error}` : result || (
             <div className={styles.placeholder}>응답 대기중...</div>
           )}
-        </div>
+        </div> */}
+        <div className={styles.contentText}>
+            {error ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ color: '#ff6b6b' }}>⚠️ {error}</span>
+                {error.includes('키가 올바르지') && (
+                  <a href="/personalization" style={{ fontSize: '11px', color: '#ff6b6b', textDecoration: 'underline' }}>
+                    → 설정에서 API 키 확인
+                  </a>
+                )}
+              </div>
+              ) : result || (
+                <div className={styles.placeholder}>응답 대기중...</div>
+              )}
+          </div>
       </div>
 
       {isCenter && result && (
