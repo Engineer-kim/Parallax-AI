@@ -155,23 +155,32 @@ class ChatService:
             selected_model=selected_model
         )
 
-    async def get_chat_history(
-        self,
-        session_id: int
-    ):
 
-        messages = await self.chat_message_repository.find_by_session_id(
-            session_id=session_id
-        )
+    # 채팅 원장 기록
+    async def get_chat(self, account_id: int) -> list:
+        chat_history = await self.chat_session_repository.find_by_account_id(account_id)
+        return [
+            {
+                "id": s.id,
+                "title": s.title,
+            }
+            for s in chat_history
+        ]
 
+    # 각 채팅 기록에 대한 상세(해당 채팅에서 실제로 나눳던 대화 내용들)
+    async def get_chat_messages(self, account_id: int, session_id: int) -> list:
+        session = await self.chat_session_repository.find_by_id(session_id)
+        if not session or session.account_id != account_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="채팅(내역)을 찾을 수 없습니다."
+            )
+
+        messages = await self.chat_message_repository.find_by_session_id(session_id)
         result = []
 
         for message in messages:
-
-            responses = await self.ai_response_repository.find_by_message_id(
-                message.id
-            )
-
+            responses = await self.ai_response_repository.find_by_message_id(message.id)
             result.append({
                 "message_id": message.id,
                 "role": message.role,
@@ -181,14 +190,14 @@ class ChatService:
                 "content": message.content,
                 "file_url": message.file_url,
                 "mime_type": message.mime_type,
-                "responses": [
+                "results": [
                     {
-                        "model": response.model,
-                        "content": response.content,
-                        "error": response.error,
-                        "latency_ms": response.latency_ms
+                        "model": r.model,
+                        "result": r.content,
+                        "error": r.error,
+                        "latency_ms": r.latency_ms,
                     }
-                    for response in responses
+                    for r in responses
                 ]
             })
 

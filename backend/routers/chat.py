@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi import status
 from fastapi import Response
 from fastapi import Depends
@@ -17,6 +17,7 @@ from schemas.response import ResponseStatus
 from services.harness_service import harness_check
 from services.nemo_service import rails
 from services.chat_service import ChatService
+from util.auth_middleware import get_current_account_id
 
 from util.check_result_after_gaurd_rail import check_if_refused_by_llm
 from util.database import connect_db
@@ -130,3 +131,34 @@ async def chat(data: ParallaxRequest,response: Response,db: Session = Depends(co
         request_id=request_id,
         results=ai_results
     )
+
+
+#왼쪽에 보일 챗팅 제못
+
+@router.get("/chat/history/list")
+async def get_chat_history_list(
+    response: Response,
+    account_id: int = Depends(get_current_account_id),
+    db: Session = Depends(connect_db)
+):
+    try:
+        chat_service = ChatService(db)
+        return await chat_service.get_chat(account_id)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+
+# 해당 채팅 아이디로 나눈 상세 기록
+@router.get("/chat/history/{session_id}")
+async def get_chat_history_desc(
+    session_id: int,
+    response: Response,
+    account_id: int = Depends(get_current_account_id),
+    db: Session = Depends(connect_db)
+):
+    try:
+        chat_service = ChatService(db)
+        return await chat_service.get_chat_messages(account_id, session_id)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
