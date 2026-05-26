@@ -10,6 +10,7 @@ export function useChatManager() {
   const [loading, setLoading] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const sessionIdRef = useRef<number | null>(null)
   const currentChat = chats.find(c => c.id === currentId)
 
   const scrollToBottom = useCallback(() => {
@@ -23,6 +24,7 @@ export function useChatManager() {
   }, [currentChat?.messages.length, scrollToBottom])
 
   const newChat = () => {
+    sessionIdRef.current = null
     const id = crypto.randomUUID()
     const chat: Chat = {
       id,
@@ -106,11 +108,14 @@ export function useChatManager() {
       )
     )
 
+    const currentChat = chats.find(c => c.id === chatId)
+    const sessionId = currentChat?.sessionId || null
+    // console.log('보내는 session_id:', sessionId, 'ref:', sessionIdRef.current, 'chatData:', currentChat?.sessionId)
     setLoading(true)
-
+   
     try {
       const body: BackendRequest = {
-        session_id: null,
+        session_id: sessionId,
         input_order: inputOrder,
         selected_model: lastSelectedResult?.model || null,
         content_type: contentType,
@@ -125,6 +130,16 @@ export function useChatManager() {
       }
 
       const data = await sendChatRequest(body)
+      // console.log('응답 data:', data)
+      // console.log('session_id 받음:', data.session_id)
+
+      if (data.session_id) {
+        sessionIdRef.current = data.session_id
+        // console.log('ref 저장됨:', sessionIdRef.current)
+        setChats(prev => prev.map(c =>
+          c.id === chatId ? { ...c, sessionId: data.session_id } : c
+        ))
+      }
 
       if (data.status === 'blocked') {
         setError(data.message || '요청이 차단되었습니다.')

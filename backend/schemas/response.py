@@ -19,5 +19,6 @@ class ModelResult(BaseModel):
 class ParallaxResponse(BaseModel):
     status: ResponseStatus
     request_id: str
+    session_id: int | None = None
     results: list[ModelResult] = []
     message: Optional[str] = None

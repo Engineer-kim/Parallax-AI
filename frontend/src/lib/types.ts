@@ -47,6 +47,7 @@ export interface BackendResponse {
   request_id: string
   results: BackendModelResult[]
   message: string | null
+  session_id: number | null
 }
 
 export interface Message {
@@ -61,6 +62,7 @@ export interface Chat {
   title: string
   date: string
   messages: Message[]
+  sessionId?: number | null
 }
 
 export interface StartChatPayload {

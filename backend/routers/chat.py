@@ -129,6 +129,7 @@ async def chat(data: ParallaxRequest,response: Response,db: Session = Depends(co
     return ParallaxResponse(
         status=ResponseStatus.SUCCESS,
         request_id=request_id,
+        session_id=message.session_id,
         results=ai_results
     )
 

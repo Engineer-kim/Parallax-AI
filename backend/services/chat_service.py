@@ -25,7 +25,7 @@ class ChatService:
     async def save_user_message(
         self,
         account_id: int,
-        session_id: int,
+        session_id: int | None,
         role: str,
         input_order: int,
         selected_model: str | None = None,
