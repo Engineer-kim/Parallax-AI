@@ -5,6 +5,13 @@ load_dotenv()
 
 IS_PROD = os.getenv("ENV") == "production"
 
+COOKIE_DOMAIN = (
+    os.getenv("COOKIE_DOMAIN")
+    if IS_PROD
+    else None
+)
+
+
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:3000,http://127.0.0.1:3000"

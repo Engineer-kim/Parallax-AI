@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status, Depends, APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from config import IS_PROD
+from config import IS_PROD, COOKIE_DOMAIN
 from schemas.login_request import LoginRequest
 from schemas.sign_up_request import SignUpRequest
 from services.auth_service import AuthService
@@ -36,7 +36,7 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
         samesite="none" if IS_PROD else "lax",
         max_age=1800,
         path="/",
-        domain=None
+        domain=COOKIE_DOMAIN
     )
     response.set_cookie(
         key="refresh_token",
@@ -46,7 +46,7 @@ async def login(request: LoginRequest, auth_service: AuthService = Depends()):
         samesite="none" if IS_PROD else "lax",
         max_age=60 * 60 * 24 * 7,
         path="/",
-        domain=None
+        domain=COOKIE_DOMAIN
     )
 
     return response
@@ -73,7 +73,7 @@ async def logout(current_user: dict = Depends(get_current_user),auth_service: Au
     response.delete_cookie(
         key="access_token",
         path="/",
-        domain=None,
+        domain=COOKIE_DOMAIN,
         httponly=True,
         secure=IS_PROD,
         samesite="none" if IS_PROD else "lax"
@@ -81,7 +81,7 @@ async def logout(current_user: dict = Depends(get_current_user),auth_service: Au
     response.delete_cookie(
         key="refresh_token",
         path="/",
-        domain=None,
+        domain=COOKIE_DOMAIN,
         httponly=True,
         secure=IS_PROD,
         samesite="none" if IS_PROD else "lax"
@@ -113,7 +113,8 @@ async def refresh(request: Request,auth_service: AuthService = Depends()):
         httponly=True,
         secure=IS_PROD,
         samesite="none" if IS_PROD else "lax",
-        max_age=1800
+        max_age=1800,
+        domain=COOKIE_DOMAIN
     )
 
     return response
