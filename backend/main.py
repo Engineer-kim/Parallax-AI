@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,11 +10,20 @@ from dotenv import load_dotenv
 import os
 
 from util.auth_middleware import AuthFilterMiddleware
+from util.database import create_tables
 
 load_dotenv()
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY", "")
 
-app = FastAPI(title="Parallax AI")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_tables()
+    yield
+
+app = FastAPI(
+    title="Parallax AI",
+    lifespan=lifespan
+)
 
 app.add_middleware(CORSMiddleware, **CORS_CONFIG)
 app.add_middleware(AuthFilterMiddleware)
