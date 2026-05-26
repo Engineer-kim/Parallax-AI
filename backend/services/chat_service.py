@@ -133,13 +133,14 @@ class ChatService:
         results = await asyncio.gather(*tasks, return_exceptions=False)
 
         for r in results:
-            await self.ai_response_repository.create(
-                message_id=message_id,
-                model=r.model,
-                content=r.result,
-                latency_ms=r.latency_ms,
-                error=r.error
-            )
+            if r.error is None:
+                await self.ai_response_repository.create(
+                    message_id=message_id,
+                    model=r.model,
+                    content=r.result,
+                    latency_ms=r.latency_ms,
+                    error=r.error
+                )
 
         return list(results)
 

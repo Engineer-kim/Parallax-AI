@@ -10,4 +10,4 @@ class UserApiKey(Base):
     model = Column(String(50), nullable=False)
     api_key = Column(String(500), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, onupdate=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
