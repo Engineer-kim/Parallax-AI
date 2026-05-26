@@ -109,11 +109,7 @@ class ChatService:
                     (time.perf_counter() - started) * 1000
                 )
 
-                error_msg = str(e)
-
-                if "401" in error_msg or "400" in error_msg:
-                    error_msg = f"{model_name.upper()} API 키가 올바르지 않습니다. 설정에서 확인해주세요."
-
+                error_msg = parse_error_msg(model_name, str(e))
                 return ModelResult(
                     model=model_name,
                     result=None,
@@ -133,7 +129,7 @@ class ChatService:
         results = await asyncio.gather(*tasks, return_exceptions=False)
 
         for r in results:
-            if r.error is None:
+            # if r.error is None:
                 await self.ai_response_repository.create(
                     message_id=message_id,
                     model=r.model,
@@ -204,3 +200,14 @@ class ChatService:
             })
 
         return result
+
+def parse_error_msg(model_name: str, error_msg: str) -> str:
+    if "401" in error_msg:
+        return f"{model_name.upper()} API 키가 올바르지 않습니다. 설정에서 확인해주세요."
+    if "400" in error_msg:
+        return f"{model_name.upper()} API 키가 올바르지 않습니다. 설정에서 확인해주세요."
+    if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "Quota" in error_msg:
+        return f"{model_name.upper()} API 사용량이 초과되었습니다. 플랜 및 할당량을 확인해주세요."
+    if "503" in error_msg or "UNAVAILABLE" in error_msg:
+        return f"{model_name.upper()} 서버가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요."
+    return f"{model_name.upper()} 응답 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
