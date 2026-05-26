@@ -13,3 +13,6 @@
   
 - 개발 진행중인 화면
   - <img width="1911" height="907" alt="image" src="https://github.com/user-attachments/assets/23f7740d-8fd8-4eec-a36b-ab87cc9bd7df" />
+
+- Application Url: 
+   - https://app.parallex-ai.site/
