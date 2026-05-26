@@ -159,6 +159,8 @@ class ChatService:
     # 채팅 원장 기록
     async def get_chat(self, account_id: int) -> list:
         chat_history = await self.chat_session_repository.find_by_account_id(account_id)
+        if not chat_history:
+            return []
         return [
             {
                 "id": s.id,

@@ -212,3 +212,23 @@ export async function deleteApiKey(model: string): Promise<void> {
   })
   if (!res.ok) throw new Error('API 키 삭제 실패')
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function fetchChatHistory(): Promise<any[]> {
+  const res = await fetch(`${API_BASE}/start/chat/history/list`, { 
+    method: 'GET',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('세션 목록 불러오기 실패')
+  return res.json()
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function fetchChatDetailHistory(sessionId: number): Promise<any[]> {
+  const res = await fetch(`${API_BASE}/start/chat/history/${sessionId}`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('채팅 상세 내역 불러오기 실패')
+  return res.json()
+}

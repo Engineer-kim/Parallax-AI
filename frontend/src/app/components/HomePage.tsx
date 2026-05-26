@@ -19,7 +19,6 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
     return cleanup
   }, [])
 
-
   const { isDark, toggleTheme } = useTheme()
 
   const {
@@ -34,7 +33,16 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
     newChat,
     handleSelect,
     handleSend,
+    loadChatHistory,
+    loadChatDetailHistory,
   } = useChatManager()
+
+  useEffect(() => {
+    if (initialAccountId) {
+      loadChatHistory()
+    }
+  }, [initialAccountId, loadChatHistory])
+
 
 
   const { accountId, setAccountId, showLoginModal, setShowLoginModal, loading, handleLogout } =
@@ -57,6 +65,7 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
   const handleLoginSuccess = (id: number) => {
     setAccountId(id)
     setShowLoginModal(false)
+    loadChatHistory()
   }
 
   const handleLogoutClick = async () => {
@@ -74,6 +83,8 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
           setCurrentId(id)
           setError(null)
           setExpandedResults(null)
+          console.log('Loading chat history for session ID:', id)
+          loadChatDetailHistory(Number(id))
         }}
         onThemeToggle={toggleTheme}
         isDark={isDark}

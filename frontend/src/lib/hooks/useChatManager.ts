@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import type { Chat, Message, Result, Base64File, BackendRequest } from '@/lib/types'
-import { sendChatRequest } from '@/lib/api'
+import { fetchChatDetailHistory, fetchChatHistory, sendChatRequest } from '@/lib/api'
 
 export function useChatManager() {
   const [chats, setChats] = useState<Chat[]>([])
@@ -173,12 +173,68 @@ export function useChatManager() {
     ? currentChat.messages.map(m => m.role).lastIndexOf('assistant')
     : -1
 
+
+
+
   const clearChats = useCallback(() => {
     setChats([])
     setCurrentId('')
     setError(null)
     setExpandedResults(null)
   }, [])
+
+  const loadChatHistory = useCallback(async () => {
+    try {
+      const sessions = await fetchChatHistory()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mapped: Chat[] = sessions.map((s: any) => ({
+        id: String(s.id),
+        title: s.title,
+        date: s.date,
+        messages: [],
+        sessionId: s.id,
+      }))
+      setChats(mapped)
+    } catch (e) {
+      console.error(e)
+    }
+  }, [])
+
+  const loadChatDetailHistory = useCallback(async (sessionId: number) => {
+    try {
+      const data = await fetchChatDetailHistory(sessionId)
+      const messages: Message[] = []
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data.forEach((m: any) => {
+        messages.push({
+          role: 'user',
+          content: m.content || '',
+          results: [],
+        })
+
+        if (m.results && m.results.length > 0) {
+          messages.push({
+            role: 'assistant',
+            content: '',
+            results: m.results,
+            selectedResult: m.selected_model
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ? m.results.find((r: any) => r.model === m.selected_model) || undefined
+              : undefined,
+          })
+        }
+      })
+
+      setChats(prev => prev.map(c =>
+        c.id === String(sessionId) ? { ...c, messages } : c
+      ))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [])
+
+
 
   return {
     chats,
@@ -196,5 +252,7 @@ export function useChatManager() {
     clearChats, 
     handleSelect,
     handleSend,
+    loadChatHistory,
+    loadChatDetailHistory,
   }
 }
