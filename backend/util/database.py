@@ -20,7 +20,8 @@ engine = create_async_engine(
     pool_recycle=1800,
     pool_pre_ping=True,
     connect_args={
-        "ssl": "require"
+        "ssl": "require",
+        "statement_cache_size": 0,
     }
 )
 
