@@ -29,6 +29,7 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
     setError,
     setExpandedResults,
     clearChats,
+    updateSessionRef,
     messagesEndRef,
     newChat,
     handleSelect,
@@ -83,7 +84,8 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
           setCurrentId(id)
           setError(null)
           setExpandedResults(null)
-          console.log('Loading chat history for session ID:', id)
+          const selectedChat = chats.find(c => c.id === id)
+          updateSessionRef(selectedChat?.sessionId || null)
           loadChatDetailHistory(Number(id))
         }}
         onThemeToggle={toggleTheme}

@@ -109,7 +109,7 @@ export function useChatManager() {
     )
 
     const currentChat = chats.find(c => c.id === chatId)
-    const sessionId = currentChat?.sessionId || null
+    const sessionId = currentChat?.sessionId || sessionIdRef.current || null
     // console.log('보내는 session_id:', sessionId, 'ref:', sessionIdRef.current, 'chatData:', currentChat?.sessionId)
     setLoading(true)
    
@@ -192,10 +192,15 @@ export function useChatManager() {
 
 
   const clearChats = useCallback(() => {
+    sessionIdRef.current = null
     setChats([])
     setCurrentId('')
     setError(null)
     setExpandedResults(null)
+  }, [])
+
+  const updateSessionRef = useCallback((sessionId: number | null) => {
+    sessionIdRef.current = sessionId
   }, [])
 
   const loadChatHistory = useCallback(async () => {
@@ -268,6 +273,7 @@ export function useChatManager() {
     lastAssistantIdx,
     newChat,
     clearChats, 
+    updateSessionRef,
     handleSelect,
     handleSend,
     loadChatHistory,
