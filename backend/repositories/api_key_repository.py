@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from models.user_api_key import UserApiKey
-from util.crypto import encrypt
+from util.crypto import encrypt, decrypt
 
 
 class ApiKeyRepository:
@@ -20,7 +20,7 @@ class ApiKeyRepository:
             .scalars()
             .all()
         )
-        return {row.model: row.api_key for row in rows}
+        return {row.model: decrypt(row.api_key) for row in rows}
 
     async def upsert(self, account_id: int, model: str, api_key: str) -> UserApiKey:
         row = (

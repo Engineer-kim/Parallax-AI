@@ -66,13 +66,13 @@ class ChatService:
         )
 
     async def process_ai_response(
-        self,
-        message_id: int,
-        prompt: str,
-        account_id: int,
+            self,
+            message_id: int,
+            prompt: str,
+            account_id: int,
     ) -> list[ModelResult]:
 
-        user_keys = self.user_api_key_repository.find_by_account_id(account_id)
+        user_keys = await self.user_api_key_repository.find_by_account_id(account_id)
 
         if not user_keys:
             raise HTTPException(
@@ -81,9 +81,9 @@ class ChatService:
             )
 
         async def execute_model(
-            model_name: str,
-            func,
-            api_key: str
+                model_name: str,
+                func,
+                api_key: str
         ) -> ModelResult:
 
             started = time.perf_counter()
@@ -94,14 +94,6 @@ class ChatService:
 
                 latency = int(
                     (time.perf_counter() - started) * 1000
-                )
-
-                await self.ai_response_repository.create(
-                    message_id=message_id,
-                    model=model_name,
-                    content=result,
-                    latency_ms=latency,
-                    error=None
                 )
 
                 return ModelResult(
@@ -117,18 +109,15 @@ class ChatService:
                     (time.perf_counter() - started) * 1000
                 )
 
-                await self.ai_response_repository.create(
-                    message_id=message_id,
-                    model=model_name,
-                    content=None,
-                    latency_ms=latency,
-                    error=str(e)
-                )
+                error_msg = str(e)
+
+                if "401" in error_msg:
+                    error_msg = f"{model_name.upper()} API 키가 올바르지 않습니다. 설정에서 확인해주세요."
 
                 return ModelResult(
                     model=model_name,
                     result=None,
-                    error=str(e),
+                    error=error_msg,
                     latency_ms=latency
                 )
 
@@ -140,7 +129,17 @@ class ChatService:
         if "claude" in user_keys:
             tasks.append(execute_model("claude", call_claude, user_keys["claude"]))
 
+        # gather ==> 병렬 시행
         results = await asyncio.gather(*tasks, return_exceptions=False)
+
+        for r in results:
+            await self.ai_response_repository.create(
+                message_id=message_id,
+                model=r.model,
+                content=r.result,
+                latency_ms=r.latency_ms,
+                error=r.error
+            )
 
         return list(results)
 
