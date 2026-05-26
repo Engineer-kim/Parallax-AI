@@ -13,7 +13,10 @@ engine = create_async_engine(
     echo=True,
     pool_size=10,
     max_overflow=20,
-    pool_recycle=1800
+    pool_recycle=1800,
+    connect_args = {
+        "ssl": "require"
+    }
 )
 
 async_session = async_sessionmaker(
