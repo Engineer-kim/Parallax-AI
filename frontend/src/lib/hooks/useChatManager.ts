@@ -201,6 +201,9 @@ export function useChatManager() {
   }, [])
 
   const loadChatDetailHistory = useCallback(async (sessionId: number) => {
+    //새로운 채팅일때는 내역이 당연히 없으므로 패쓰 및 불필요한API  요청 방지
+    if (!sessionId || isNaN(sessionId)) return 
+
     try {
       const data = await fetchChatDetailHistory(sessionId)
       const messages: Message[] = []
