@@ -173,6 +173,13 @@ export function useChatManager() {
     ? currentChat.messages.map(m => m.role).lastIndexOf('assistant')
     : -1
 
+  const clearChats = useCallback(() => {
+    setChats([])
+    setCurrentId('')
+    setError(null)
+    setExpandedResults(null)
+  }, [])
+
   return {
     chats,
     currentId,
@@ -186,6 +193,7 @@ export function useChatManager() {
     messagesEndRef,
     lastAssistantIdx,
     newChat,
+    clearChats, 
     handleSelect,
     handleSend,
   }

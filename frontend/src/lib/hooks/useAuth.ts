@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { logout } from '@/lib/api'
 import { blockHistoryNavigation } from '../util/historyDelete'
 
-export function useAuth(initialAccountId: number | null) {
+export function useAuth(initialAccountId: number | null, onLogout?: () => void) {
   const [accountId, setAccountId] = useState<number | null>(initialAccountId)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -15,7 +15,8 @@ export function useAuth(initialAccountId: number | null) {
     setAccountId(null)
     setError(null)
     setLoading(false)
-  }, [])
+    onLogout?.()
+  }, [onLogout])
 
   return {
     accountId,

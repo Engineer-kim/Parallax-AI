@@ -21,8 +21,6 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
 
 
   const { isDark, toggleTheme } = useTheme()
-  const { accountId, setAccountId, showLoginModal, setShowLoginModal, loading, handleLogout } =
-    useAuth(initialAccountId)
 
   const {
     chats,
@@ -31,11 +29,18 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
     currentChat,
     setError,
     setExpandedResults,
+    clearChats,
     messagesEndRef,
     newChat,
     handleSelect,
     handleSend,
   } = useChatManager()
+
+
+  const { accountId, setAccountId, showLoginModal, setShowLoginModal, loading, handleLogout } =
+    useAuth(initialAccountId, () => {
+      clearChats()
+    })
 
   const isLoggedIn = accountId !== null
 
