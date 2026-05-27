@@ -1,6 +1,7 @@
 'use client'
 import styles from './css/ModelCard.module.css'
 import type { ModelCardProps } from '@/lib/types'
+import Link from 'next/link'
 
 const MODEL_COLORS: Record<string, string> = {
   gpt: '#10a37f',
@@ -57,25 +58,25 @@ export default function ModelCard({ model, result, error, latency, isCenter, isS
       <div className={styles.divider} />
 
       <div className={styles.content} style={{ color: error ? '#ff6b6b' : 'var(--text)' }}>
-        {/* <div className={styles.contentText}>
+        <div className={styles.contentText}>
           {error ? `오류: ${error}` : result || (
             <div className={styles.placeholder}>응답 대기중...</div>
           )}
-        </div> */}
-        {/* <div className={styles.contentText}>
+        </div>
+        <div className={styles.contentText}>
             {error ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <span style={{ color: '#ff6b6b' }}>⚠️ {error}</span>
                 {error.includes('키가 올바르지') && (
-                  <a href="/personalization" style={{ fontSize: '11px', color: '#ff6b6b', textDecoration: 'underline' }}>
+                  <Link href="/personalization" style={{ fontSize: '11px', color: '#ff6b6b', textDecoration: 'underline' }}>
                     → 설정에서 API 키 확인
-                  </a>
+                  </Link>
                 )}
               </div>
               ) : result || (
                 <div className={styles.placeholder}>응답 대기중...</div>
               )}
-          </div> */}
+          </div>
       </div>
 
       {isCenter && result && (
