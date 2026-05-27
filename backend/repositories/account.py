@@ -24,3 +24,12 @@ class AccountRepository:
         await self.db.commit()
         await self.db.refresh(account)
         return account
+
+
+    async def delete(self, account_id: str) -> bool:
+        account = await self.find_by_account_id(account_id)
+        if not account:
+            return False
+        await self.db.delete(account)
+        await self.db.commit()
+        return True

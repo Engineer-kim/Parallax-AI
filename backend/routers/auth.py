@@ -1,10 +1,11 @@
-from fastapi import HTTPException, status, Depends, APIRouter, Request
+from fastapi import HTTPException, status, Depends, APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
 from config import IS_PROD, COOKIE_DOMAIN
 from schemas.login_request import LoginRequest
 from schemas.sign_up_request import SignUpRequest
 from services.auth_service import AuthService
+from util.auth_middleware import get_current_account_id
 from util.security import get_current_user
 
 router = APIRouter()
@@ -118,3 +119,22 @@ async def refresh(request: Request,auth_service: AuthService = Depends()):
     )
 
     return response
+
+@router.delete("/account", status_code=status.HTTP_200_OK)
+async def delete_account(
+    response: Response,
+    account_id: str = Depends(get_current_account_id),
+    auth_service: AuthService = Depends()
+):
+    try:
+        await auth_service.delete_account(account_id)
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        return {"account_deleted": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )

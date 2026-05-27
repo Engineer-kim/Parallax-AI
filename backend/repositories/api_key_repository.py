@@ -81,3 +81,20 @@ class ApiKeyRepository:
             .all()
         )
         return [row.model for row in rows]
+
+
+    #회원 탈퇴시 사용될 등록된 키 전부 삭제
+    async def delete_all_by_account_id(self, account_id: int) -> bool:
+        rows = (
+            (
+                await self.db.execute(
+                    select(UserApiKey).filter(UserApiKey.account_id == account_id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for row in rows:
+            await self.db.delete(row)
+        await self.db.commit()
+        return True
