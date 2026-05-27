@@ -12,7 +12,15 @@
 
   
 - 개발 진행중인 화면
-  - <img width="1911" height="907" alt="image" src="https://github.com/user-attachments/assets/23f7740d-8fd8-4eec-a36b-ab87cc9bd7df" />
+  - 메인
+     - <img width="1911" height="907" alt="image" src="https://github.com/user-attachments/assets/23f7740d-8fd8-4eec-a36b-ab87cc9bd7df" />
+
+    ---
+
+  - 개인화 설정 영역
+     - <img width="1876" height="935" alt="image" src="https://github.com/user-attachments/assets/40fffa78-6ba8-44db-a492-9cd9201fe1e9" />
+
+   
 
 - Application Url(ProtoType): 
    - https://app.parallex-ai.site/
