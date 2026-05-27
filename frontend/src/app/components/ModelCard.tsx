@@ -62,7 +62,7 @@ export default function ModelCard({ model, result, error, latency, isCenter, isS
             <div className={styles.placeholder}>응답 대기중...</div>
           )}
         </div> */}
-        <div className={styles.contentText}>
+        {/* <div className={styles.contentText}>
             {error ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <span style={{ color: '#ff6b6b' }}>⚠️ {error}</span>
@@ -75,7 +75,7 @@ export default function ModelCard({ model, result, error, latency, isCenter, isS
               ) : result || (
                 <div className={styles.placeholder}>응답 대기중...</div>
               )}
-          </div>
+          </div> */}
       </div>
 
       {isCenter && result && (

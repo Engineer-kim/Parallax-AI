@@ -13,6 +13,7 @@ from models import account
 from schemas.request import ParallaxRequest
 from schemas.response import ParallaxResponse, ModelResult
 from schemas.response import ResponseStatus
+from services.api_key_service import ApiKeyService
 
 from services.harness_service import harness_check
 from services.nemo_service import rails
@@ -26,7 +27,7 @@ router = APIRouter()
 
 
 @router.post("/chat", response_model=ParallaxResponse)
-async def chat(data: ParallaxRequest,response: Response,db: Session = Depends(connect_db)):
+async def chat(data: ParallaxRequest,response: Response,db: Session = Depends(connect_db), api_key_service : ApiKeyService = Depends()):
 
     request_id = str(uuid.uuid4())
 
@@ -119,6 +120,17 @@ async def chat(data: ParallaxRequest,response: Response,db: Session = Depends(co
         mime_type=data.mime_type
     )
 
+    api_key = await api_key_service.find_by_account_id(data.account_id)
+
+    if not api_key:
+        response.status_code = status.HTTP_404_NOT_FOUND
+
+        return ParallaxResponse(
+            status=ResponseStatus.BLOCKED,
+            request_id=request_id,
+            message="등록된 API키가 없습니다. 키 등록을 최소 1개는 해주세요",
+            results=[]
+        )
 
     ai_results = await chat_service.process_ai_response(
         message_id=message.id,
@@ -163,3 +175,5 @@ async def get_chat_history_desc(
         return await chat_service.get_chat_messages(account_id, session_id)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+

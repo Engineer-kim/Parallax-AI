@@ -26,6 +26,7 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
     currentId,
     setCurrentId,
     currentChat,
+    error,
     setError,
     setExpandedResults,
     clearChats,
@@ -131,6 +132,22 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
             )}
           </div>
         </div>
+
+        {error && (
+          <div className={styles.errorNotification}>
+            <div className={styles.errorContent}>
+              <span className={styles.errorIcon}>⚠️</span>
+              <span className={styles.errorMessage}>{error}</span>
+              <button
+                onClick={() => setError(null)}
+                className={styles.errorCloseButton}
+                aria-label="Close error notification"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className={styles.chatArea}>
           {!currentChat || currentChat.messages.length === 0 ? (
