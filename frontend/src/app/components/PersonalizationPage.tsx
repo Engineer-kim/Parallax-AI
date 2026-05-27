@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { fetchAvailableModels } from '@/lib/api'
 import { ArrowLeft, Settings, Palette, Shield, Zap } from 'lucide-react'
 import Link from 'next/link'
 import styles from '../personalization/page.module.css'
@@ -23,6 +24,11 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
   const [apiKeys, setApiKeys] = useState({ gpt: '', gemini: '', claude: '' })
   const [apiKeySaving, setApiKeySaving] = useState(false)
   const [showKeys, setShowKeys] = useState({ gpt: false, gemini: false, claude: false })
+  const [registeredModels, setRegisteredModels] = useState<string[]>([])
+
+  useEffect(() => {
+    fetchAvailableModels().then(setRegisteredModels)
+  }, [])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSettingChange = (key: keyof UserSettings, value: any) => {
@@ -51,6 +57,8 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
     setApiKeySaving(true)
     try {
       await saveApiKey(model, key)
+      const updated = await fetchAvailableModels()
+      setRegisteredModels(updated)
       alert(`${model.toUpperCase()} 키가 저장되었습니다.`)
     } catch {
       alert('저장 실패')
@@ -63,6 +71,8 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
     try {
       await deleteApiKey(model)
       setApiKeys(prev => ({ ...prev, [model]: '' }))
+      const updated = await fetchAvailableModels()
+      setRegisteredModels(updated)
       alert(`${model.toUpperCase()} 키가 삭제되었습니다.`)
     } catch {
       alert('삭제 실패')
@@ -153,7 +163,16 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
               <div key={model} className={styles.settingCard}>
                 <h3 className={styles.settingCardTitle}>
                   {model === 'gpt' ? 'GPT-4o (OpenAI)' : model === 'gemini' ? 'Gemini (Google)' : 'Claude (Anthropic)'}
-                </h3>
+                  {registeredModels.includes(model) ? (
+                      <span style={{ fontSize: '11px', color: '#10a37f', marginLeft: '8px' }}>
+                        ✓ 등록됨
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '11px', color: '#ef4444', marginLeft: '8px' }}>
+                        ✗ 등록 안됨
+                      </span>
+                  )}
+                  </h3>
                 <p className={styles.settingCardDescription}>
                   {model === 'gpt' ? 'platform.openai.com' : model === 'gemini' ? 'aistudio.google.com' : 'console.anthropic.com'}에서 발급받은 키를 입력하세요.
                 </p>
@@ -195,6 +214,7 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
                     <button
                       className={`${styles.actionButton} ${styles.dangerButton}`}
                       onClick={() => handleApiKeyDelete(model)}
+                      disabled={!registeredModels.includes(model)}
                       style={{ fontSize: '12px', padding: '8px 14px' }}
                     >
                       삭제

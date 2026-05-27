@@ -232,3 +232,12 @@ export async function fetchChatDetailHistory(sessionId: number): Promise<any[]> 
   if (!res.ok) throw new Error('채팅 상세 내역 불러오기 실패')
   return res.json()
 }
+
+export async function fetchAvailableModels(): Promise<string[]> {
+const res = await fetch(`${API_BASE}/keys/registered`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('등록된 모델 목록 불러오기 실패')
+  return res.json()
+}

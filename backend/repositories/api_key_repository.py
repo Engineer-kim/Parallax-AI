@@ -80,7 +80,7 @@ class ApiKeyRepository:
             )
             .all()
         )
-        return [row.model for row in rows]
+        return [row[0] for row in rows]
 
 
     #회원 탈퇴시 사용될 등록된 키 전부 삭제

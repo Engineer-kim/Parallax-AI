@@ -1,10 +1,20 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Sun, Moon } from 'lucide-react'
 import styles from './css/ThemeToggle.module.css'
 import { ThemeToggleProps } from '@/lib/types'
 
 export default function ThemeToggle({ isDark, onThemeToggle }: ThemeToggleProps) {
+
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
   return (
     <div className={styles.toggleContainer}>
       <button
