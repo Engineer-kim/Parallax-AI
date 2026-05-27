@@ -1,7 +1,7 @@
 'use client'
 import { useState, useRef } from 'react'
 import { Send, Paperclip, X } from 'lucide-react'
-import styles from './ChatInput.module.css'
+import styles from './css/ChatInput.module.css'
 import type { Base64File, ChatInputProps } from '@/lib/types'
 
 export default function ChatInput({ onSend, loading }: ChatInputProps) {

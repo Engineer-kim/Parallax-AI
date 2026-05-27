@@ -1,9 +1,11 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Search, MessageSquare, Sun, Moon, Settings } from 'lucide-react'
-import styles from './Sidebar.module.css'
+import { Plus, Search, MessageSquare, Settings } from 'lucide-react'
+import styles from './css/Sidebar.module.css'
 import Link from 'next/link'
 import type { SidebarProps } from '@/lib/types'
+import ThemeToggle from './ThemeToggle'
+
 
 export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeToggle, isDark, isLoggedIn }: SidebarProps) {
   const [search, setSearch] = useState('')
@@ -69,10 +71,7 @@ export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeTogg
             <span>설정</span>
           </Link>
         )}
-        <button onClick={onThemeToggle} className={styles.themeButton}>
-          {isDark ? <Sun size={13} /> : <Moon size={13} />}
-          {isDark ? '라이트 모드' : '다크 모드'}
-        </button>
+        <ThemeToggle isDark={isDark} onThemeToggle={onThemeToggle} />
       </div>
     </aside>
   )

@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import ModelCard from './ModelCard'
-import styles from './CylinderCarousel.module.css'
+import styles from './css/CylinderCarousel.module.css'
 import type { CylinderCarouselProps } from '@/lib/types'
 
 export default function CylinderCarousel({ results, onSelect, selectedModel }: CylinderCarouselProps) {

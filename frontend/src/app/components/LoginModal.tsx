@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import styles from './LoginModal.module.css'
+import styles from './css/LoginModal.module.css'
 
 // 1. 컴파일 에러 해결을 위해 프로프 타입 정의에 onLoginSuccess 추가
 type LoginModalProps = {

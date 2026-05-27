@@ -1,5 +1,5 @@
 'use client'
-import styles from './ModelCard.module.css'
+import styles from './css/ModelCard.module.css'
 import type { ModelCardProps } from '@/lib/types'
 
 const MODEL_COLORS: Record<string, string> = {

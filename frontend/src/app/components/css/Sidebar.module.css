@@ -175,12 +175,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   transition: all 0.2s;
-  min-width: 32px;
   font-size: 12px;
   font-family: 'DM Mono';
   text-decoration: none;
-  white-space: nowrap;
 }
 
 .themeButton:hover {
