@@ -9,9 +9,18 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useChatManager } from '@/lib/hooks/useChatManager'
 import { useTheme } from '@/lib/hooks/useTheme'
 import { blockHistoryNavigation } from '@/lib/util/historyDelete'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import BentoCompare from './BentoCompare'
 
 export default function HomeClient({ initialAccountId }: { initialAccountId: number | null }) {
+
+  const [responseLayout] = useState<'carousel' | 'bento'>(() => {
+    if (typeof window === 'undefined') return 'carousel'
+
+    const saved = localStorage.getItem('response-layout')
+
+    return saved === 'bento' ? 'bento' : 'carousel'
+  })
 
   useEffect(() => {
     const cleanup = blockHistoryNavigation()
@@ -171,11 +180,24 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
                   if (results.length > 0) {
                     return (
                       <div key={idx} className={styles.chatList}>
-                        <CylinderCarousel
+                        {/* <CylinderCarousel
                           results={results}
                           onSelect={result => handleSelect(result, idx)}
                           selectedModel={msg.selectedResult?.model}
-                        />
+                        /> */}
+                        {responseLayout === 'carousel' ? (
+                          <CylinderCarousel
+                            results={results}
+                            onSelect={result => handleSelect(result, idx)}
+                            selectedModel={msg.selectedResult?.model}
+                          />
+                        ) : (
+                          <BentoCompare
+                            results={results}
+                            onSelect={result => handleSelect(result, idx)}
+                            selectedModel={msg.selectedResult?.model}
+                          />
+                        )}
                       </div>
                     )
                   }

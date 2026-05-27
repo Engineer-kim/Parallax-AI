@@ -116,11 +116,11 @@ export interface ChatInputProps {
 
 export interface UserSettings {
   theme: 'dark' | 'light'
-  notifications: boolean
-  emailNotifications: boolean
-  modelPreferences: string[]
-  defaultLanguage: 'ko' | 'en'
-  autoSave: boolean
+  // notifications: boolean
+  // emailNotifications: boolean
+  // modelPreferences: string[]
+  // defaultLanguage: 'ko' | 'en'
+  // autoSave: boolean
 }
 
 export interface PersonalizationPageProps {

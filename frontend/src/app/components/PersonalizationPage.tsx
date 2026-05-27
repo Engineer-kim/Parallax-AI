@@ -10,15 +10,18 @@ import { savePersonalizationSettings, saveApiKey, deleteApiKey } from '@/lib/api
 import { useTheme } from '@/lib/hooks/useTheme'
 
 export default function PersonalizationClient({ accountId }: PersonalizationPageProps) {
-   const { isDark, toggleTheme } = useTheme()
+  const { isDark, toggleTheme } = useTheme()
+
+  const [responseLayout, setResponseLayout] = useState<'carousel' | 'bento'>(() => {
+    if (typeof window === 'undefined') return 'carousel'
+
+    const saved = localStorage.getItem('response-layout')
+
+    return saved === 'bento' ? 'bento' : 'carousel'
+  })
 
   const [settings, setSettings] = useState<UserSettings>({
     theme: isDark ? 'dark' : 'light',
-    notifications: true,
-    emailNotifications: false,
-    modelPreferences: [],
-    defaultLanguage: 'ko',
-    autoSave: true,
   })
 
   const [apiKeys, setApiKeys] = useState({ gpt: '', gemini: '', claude: '' })
@@ -30,26 +33,9 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
     fetchAvailableModels().then(setRegisteredModels)
   }, [])
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSettingChange = (key: keyof UserSettings, value: any) => {
-
-    if (key === 'theme') {
-      toggleTheme()
-    }
-
-    setSettings(prev => ({ ...prev, [key]: value }))
-  }
-
-  const handleSave = async () => {
-    try {
-      await savePersonalizationSettings(settings)
-      alert('설정이 저장되었습니다.')
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '설정 저장 중 오류가 발생했습니다.'
-      console.error('설정 저장 오류:', error)
-      alert(errorMessage)
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('response-layout', responseLayout)
+  }, [responseLayout])
 
   const handleApiKeySave = async (model: 'gpt' | 'gemini' | 'claude') => {
     const key = apiKeys[model]
@@ -128,21 +114,30 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
             </div>
 
             <div className={styles.settingCard}>
-              <h3 className={styles.settingCardTitle}>언어</h3>
-              <p className={styles.settingCardDescription}>기본 언어를 설정합니다.</p>
+              <h3 className={styles.settingCardTitle}>응답 레이아웃</h3>
+              <p className={styles.settingCardDescription}>AI 응답 표시 방식을 설정합니다.</p>
               <div className={styles.settingCardContent}>
                 <div className={styles.preferencesGrid}>
-                  <button
-                    className={`${styles.preferenceButton} ${settings.defaultLanguage === 'ko' ? styles.active : ''}`}
-                    onClick={() => handleSettingChange('defaultLanguage', 'ko')}
-                  >
-                    한국어
+                 <button
+                    className={`${styles.preferenceButton} ${responseLayout === 'carousel' ? styles.active : ''}`}
+                    onClick={() => setResponseLayout('carousel')}>
+                     <div className={styles.layoutPreviewCarousel}>
+                        <div className={styles.layoutPreviewCenter} />
+                        <div className={styles.layoutPreviewLeft} />
+                        <div className={styles.layoutPreviewRight} />
+                      </div>
+                    캐러셀
                   </button>
+
                   <button
-                    className={`${styles.preferenceButton} ${settings.defaultLanguage === 'en' ? styles.active : ''}`}
-                    onClick={() => handleSettingChange('defaultLanguage', 'en')}
-                  >
-                    English
+                    className={`${styles.preferenceButton} ${responseLayout === 'bento' ? styles.active : ''}`}
+                    onClick={() => setResponseLayout('bento')}>
+                     <div className={styles.layoutPreviewBento}>
+                      <div className={styles.layoutPreviewBentoItem} />
+                      <div className={styles.layoutPreviewBentoItem} />
+                      <div className={styles.layoutPreviewBentoItem} />
+                    </div>
+                    벤토
                   </button>
                 </div>
               </div>
@@ -248,9 +243,6 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
           </div>
         </div>
 
-        <button className={styles.saveButton} onClick={handleSave}>
-          설정 저장
-        </button>
       </div>
     </div>
   )

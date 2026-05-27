@@ -313,3 +313,73 @@
     font-size: 16px;
   }
 }
+
+.layoutPreviewCarousel {
+  position: relative;
+  width: 100%;
+  height: 70px;
+  margin-bottom: 12px;
+}
+
+.layoutPreviewCenter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 64px;
+  border-radius: 14px;
+  background: rgba(139, 92, 246, 0.9);
+  transform: translate(-50%, -50%);
+  z-index: 3;
+}
+
+.layoutPreviewLeft {
+  position: absolute;
+  left: 22%;
+  top: 50%;
+  width: 44px;
+  height: 54px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-50%);
+}
+
+.layoutPreviewRight {
+  position: absolute;
+  right: 22%;
+  top: 50%;
+  width: 44px;
+  height: 54px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-50%);
+}
+
+.layoutPreviewBento {
+  width: 44px;
+  height: 28px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+}
+
+.layoutPreviewBentoItem {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.layoutPreviewBentoItem:nth-child(1) {
+  grid-row: 1 / span 2;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.layoutPreviewBentoItem:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.layoutPreviewBentoItem:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+}
