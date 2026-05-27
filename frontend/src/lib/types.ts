@@ -126,3 +126,8 @@ export interface UserSettings {
 export interface PersonalizationPageProps {
   accountId: number | null
 }
+
+export interface ThemeToggleProps {
+  isDark: boolean;
+  onThemeToggle: () => void;
+}

@@ -6,10 +6,13 @@ import Link from 'next/link'
 import styles from '../personalization/page.module.css'
 import { PersonalizationPageProps, UserSettings } from '@/lib/types'
 import { savePersonalizationSettings, saveApiKey, deleteApiKey } from '@/lib/api'
+import { useTheme } from '@/lib/hooks/useTheme'
 
 export default function PersonalizationClient({ accountId }: PersonalizationPageProps) {
+   const { isDark, toggleTheme } = useTheme()
+
   const [settings, setSettings] = useState<UserSettings>({
-    theme: 'dark',
+    theme: isDark ? 'dark' : 'light',
     notifications: true,
     emailNotifications: false,
     modelPreferences: [],
@@ -23,6 +26,11 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSettingChange = (key: keyof UserSettings, value: any) => {
+
+    if (key === 'theme') {
+      toggleTheme()
+    }
+
     setSettings(prev => ({ ...prev, [key]: value }))
   }
 
@@ -61,6 +69,12 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
     }
   }
 
+  const handleThemeChange = (theme: 'dark' | 'light') => {
+    if (theme === 'dark' && !isDark) toggleTheme()
+    if (theme === 'light' && isDark) toggleTheme()
+    setSettings(prev => ({ ...prev, theme }))
+  }
+
   return (
     <div className={styles.personalizationContainer}>
       <header className={styles.header}>
@@ -90,15 +104,13 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
               <div className={styles.settingCardContent}>
                 <div className={styles.preferencesGrid}>
                   <button
-                    className={`${styles.preferenceButton} ${settings.theme === 'dark' ? styles.active : ''}`}
-                    onClick={() => handleSettingChange('theme', 'dark')}
-                  >
+                    className={`${styles.preferenceButton} ${isDark ? styles.active : ''}`}
+                    onClick={() => handleThemeChange('dark')}>
                     🌙 다크 모드
                   </button>
                   <button
-                    className={`${styles.preferenceButton} ${settings.theme === 'light' ? styles.active : ''}`}
-                    onClick={() => handleSettingChange('theme', 'light')}
-                  >
+                    className={`${styles.preferenceButton} ${!isDark ? styles.active : ''}`}
+                    onClick={() => handleThemeChange('light')}>
                     ☀️ 라이트 모드
                   </button>
                 </div>
