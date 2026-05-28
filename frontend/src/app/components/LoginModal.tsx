@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import styles from './css/LoginModal.module.css'
+import { useEffect, useState } from 'react'
 
 type LoginModalProps = {
   onClose: () => void
@@ -9,8 +10,12 @@ type LoginModalProps = {
 }
 
 export default function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
-  const isDark = document.documentElement.dataset.theme !== 'light'
-  
+  const [isDark] = useState(() => {
+    if (typeof window === 'undefined') return false
+
+    return localStorage.getItem('theme') !== 'light'
+  })
+
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" onClick={onClose}>
       <div className={styles.content} 
