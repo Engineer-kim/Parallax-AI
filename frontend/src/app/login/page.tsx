@@ -12,8 +12,9 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const isDark = document.documentElement.dataset.theme !== 'light'
+  const isDark = typeof window !== 'undefined' && localStorage.getItem('theme') !== 'light'
   const inputBorder = isDark ? '1px solid #555555' : '1px solid #aaaaaa'
+  
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
