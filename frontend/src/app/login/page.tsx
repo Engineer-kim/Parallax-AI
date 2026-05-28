@@ -12,6 +12,9 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const isDark = document.documentElement.dataset.theme !== 'light'
+  const inputBorder = isDark ? '1px solid #555555' : '1px solid #aaaaaa'
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
@@ -47,7 +50,7 @@ export default function LoginPage() {
               value={loginId}
               onChange={e => setLoginId(e.target.value)}
               required
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: inputBorder, background: 'var(--bg)', color: 'var(--text)' }}
             />
           </label>
 
@@ -58,7 +61,7 @@ export default function LoginPage() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: inputBorder, background: 'var(--bg)', color: 'var(--text)' }}
             />
           </label>
 

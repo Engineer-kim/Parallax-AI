@@ -13,6 +13,9 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const isDark = document.documentElement.dataset.theme !== 'light'
+  const inputBorder = isDark ? '1px solid #555555' : '1px solid #aaaaaa'
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
@@ -37,19 +40,19 @@ export default function SignupPage() {
             회원가입
           </h1>
           <p style={{ margin: '16px 0 0', fontFamily: 'DM Mono', fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.8 }}>
-            새 계정을 만들고 Parallax AI 비교 채팅을 시작하세요.
+            새 계정을 만들고 Parallax AI 서비스를 이용하세요.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
           <label style={{ display: 'grid', gap: '8px', fontFamily: 'DM Mono', fontSize: '12px', color: 'var(--text-muted)' }}>
-            로그인 아이디
+            아이디
             <input
               type="text"
               value={loginId}
               onChange={e => setLoginId(e.target.value)}
               required
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: inputBorder, background: 'var(--bg)', color: 'var(--text)' }}
             />
           </label>
 
@@ -60,7 +63,7 @@ export default function SignupPage() {
               value={nickname}
               onChange={e => setNickname(e.target.value)}
               required
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: inputBorder, background: 'var(--bg)', color: 'var(--text)' }}
             />
           </label>
 
@@ -71,7 +74,7 @@ export default function SignupPage() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.14)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: inputBorder, background: 'var(--bg)', color: 'var(--text)' }}
             />
           </label>
 
