@@ -1,6 +1,6 @@
 .wrapper {
   display: flex;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -437,5 +437,269 @@
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+/* =========================
+   MOBILE RESPONSIVE
+   ========================= */
+
+@media (max-width: 1024px) {
+  .header {
+    padding: 16px 24px;
+  }
+
+  .chatArea {
+    padding: 20px 24px;
+  }
+
+  .chatInputFallback {
+    padding: 20px 24px;
+  }
+
+  .errorNotification {
+    padding: 12px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .main {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .header {
+    padding: 14px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .headerRight {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .branding {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+  }
+
+  .chatArea {
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
+  .chatList {
+    gap: 18px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .userRow,
+  .assistantRow,
+  .loadingRow,
+  .errorRow {
+    width: 100%;
+  }
+
+  .userBubble,
+  .assistantAlertBubble,
+  .summaryButton,
+  .errorBubble {
+    max-width: 92%;
+    width: fit-content;
+    min-width: 0;
+  }
+
+  .userBubble {
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .assistantAlertBubble {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .heroTitle {
+    font-size: 42px;
+    letter-spacing: -2px;
+    text-align: center;
+    word-break: break-word;
+  }
+
+  .welcomeCard {
+    padding: 20px;
+  }
+
+  .carouselContainer {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    min-height: auto;
+  }
+
+  .buttonGroup {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .summaryButton {
+    padding: 10px 14px;
+  }
+
+  .summaryText {
+    font-size: 11px;
+  }
+
+  .loadingCard {
+    padding: 12px 18px;
+  }
+
+  .errorNotification {
+    padding: 12px 16px;
+  }
+
+  .errorContent {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .errorMessage {
+    line-height: 1.5;
+  }
+
+  .chatInputFallback {
+    padding: 16px;
+    font-size: 11px;
+  }
+
+  .headerButton {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  .statusBlock {
+    font-size: 10px;
+  }
+
+  .loadingStatus {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px;
+  }
+
+  .chatArea {
+    padding: 12px;
+  }
+
+  .heroTitle {
+    font-size: 34px;
+  }
+
+  .userBubble,
+  .assistantAlertBubble,
+  .summaryButton,
+  .errorBubble {
+    max-width: 96%;
+  }
+
+  .userBubble {
+    border-radius: 18px 18px 6px 18px;
+  }
+
+  .assistantAlertBubble {
+    border-radius: 18px 18px 18px 6px;
+  }
+
+  .buttonGroup {
+    gap: 8px;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 5px 12px;
+  }
+
+  .loadingCard {
+    gap: 8px;
+  }
+}
+
+/* =========================
+   GLOBAL OVERFLOW FIX
+   ========================= */
+
+.wrapper,
+.main,
+.chatArea,
+.chatList,
+.carouselContainer {
+  min-width: 0;
+}
+
+.userBubble,
+.assistantAlertBubble,
+.errorBubble,
+.summaryButton {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* iOS SAFE AREA */
+
+@supports (padding: max(0px)) {
+  .chatInputFallback {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .chatArea {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+.mobileMenuButton {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileMenuButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 10px;
+    border: 1px solid var(--border);
+
+    background: var(--bg-card);
+    color: var(--text);
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+  }
+
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 }

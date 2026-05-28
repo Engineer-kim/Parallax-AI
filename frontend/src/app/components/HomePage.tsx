@@ -11,8 +11,10 @@ import { useTheme } from '@/lib/hooks/useTheme'
 import { blockHistoryNavigation } from '@/lib/util/historyDelete'
 import { useEffect, useState } from 'react'
 import BentoCompare from './BentoCompare'
+import { Menu } from 'lucide-react'
 
 export default function HomeClient({ initialAccountId }: { initialAccountId: number | null }) {
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   const [responseLayout] = useState<'carousel' | 'bento'>(() => {
     if (typeof window === 'undefined') return 'carousel'
@@ -86,6 +88,7 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
 
   return (
     <div className={styles.wrapper}>
+
       <Sidebar
         chats={chats}
         currentId={currentId}
@@ -97,14 +100,21 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
           const selectedChat = chats.find(c => c.id === id)
           updateSessionRef(selectedChat?.sessionId || null)
           loadChatDetailHistory(Number(id))
+          setMobileSidebarOpen(false)
         }}
         onThemeToggle={toggleTheme}
         isDark={isDark}
         isLoggedIn={isLoggedIn}
+        mobileOpen={mobileSidebarOpen}
+        setMobileOpen={setMobileSidebarOpen}
       />
 
       <main className={styles.main}>
         <div className={styles.header}>
+           <button className={styles.mobileMenuButton} onClick={() => setMobileSidebarOpen(true)}>
+              <Menu size={20} />
+            </button>
+
           <div className={styles.branding}>GPT-4o · GEMINI · CLAUDE</div>
 
           <div className={styles.headerRight}>

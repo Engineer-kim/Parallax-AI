@@ -1,19 +1,29 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Search, MessageSquare, Settings } from 'lucide-react'
+import { Plus, Search, MessageSquare, Settings, X  } from 'lucide-react'
 import styles from './css/Sidebar.module.css'
 import Link from 'next/link'
 import type { SidebarProps } from '@/lib/types'
 import ThemeToggle from './ThemeToggle'
 
 
-export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeToggle, isDark, isLoggedIn }: SidebarProps) {
+export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeToggle, isDark, isLoggedIn, mobileOpen, setMobileOpen, }: 
+  SidebarProps & {
+  mobileOpen: boolean
+  setMobileOpen: (open: boolean) => void
+}) {
   const [search, setSearch] = useState('')
 
   const filtered = chats.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${ mobileOpen ? styles.sidebarOpen : ''}`}>
+
+      {/* 모바일 닫기 버튼 */}
+      <button className={styles.mobileCloseButton} onClick={() => setMobileOpen(false)}>
+        <X size={20} />
+      </button>
+
       {/* 로고 */}
       <div className={styles.logoSection}>
         <div className={styles.logo}>PARALLAX</div>
