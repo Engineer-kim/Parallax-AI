@@ -92,3 +92,104 @@
 .selectButtonInactive {
   background: transparent;
 }
+
+/* =========================
+   MOBILE STYLES
+   ========================= */
+
+@media (max-width: 768px) {
+  .card {
+    position: relative;
+
+    width: 100%;
+    max-width: 360px;
+
+    height: 460px;
+
+    padding: 22px;
+
+    background: var(--bg-card);
+
+    opacity: 1;
+
+    z-index: 20;
+
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 12px 40px rgba(0, 0, 0, 0.55);
+  }
+
+  .label {
+    font-size: 15px;
+  }
+
+  .content {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    position: relative;
+
+    max-width: 320px;
+
+    height: 420px;
+
+    padding: 18px;
+
+    border-radius: 14px;
+
+    background: var(--bg-card);
+
+    opacity: 1;
+
+    z-index: 20;
+
+    background-color: var(--bg-card) !important;
+    isolation: isolate;
+    transform: translateZ(0);
+    will-change: transform;
+    overflow: hidden;
+
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 10px 32px rgba(0, 0, 0, 0.52);
+  }
+
+  .headerContainer {
+    margin-bottom: 16px;
+  }
+
+  .divider {
+    margin-bottom: 16px;
+  }
+
+  .label {
+    font-size: 14px;
+  }
+
+  .latency {
+    font-size: 10px;
+  }
+
+  .content {
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .selectButton {
+    margin-top: 12px;
+
+    padding: 9px;
+
+    font-size: 11px;
+  }
+}

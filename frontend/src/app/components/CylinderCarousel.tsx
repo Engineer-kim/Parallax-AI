@@ -19,7 +19,10 @@ export default function CylinderCarousel({ results, onSelect, selectedModel }: C
     return 'left'
   }
 
-  const positionX: Record<string, number> = { center: 0, left: -420, right: 420 }
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+
+
+  const positionX: Record<string, number> = isMobile ? { center: 0, left: -140, right: 140,} : { center: 0, left: -420, right: 420,}
   const positionZ: Record<string, number> = { center: 10, left: 5, right: 5 }
 
   return (
@@ -38,6 +41,7 @@ export default function CylinderCarousel({ results, onSelect, selectedModel }: C
           return (
             <motion.div
               key={r.model}
+              data-pos={pos}
               animate={{ x: positionX[pos], zIndex: positionZ[pos] }}
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
               className={`${styles.cardWrapper} ${pos === 'center' ? styles.cardWrapperCenter : styles.cardWrapperSide}`}
