@@ -13,11 +13,13 @@
   width: min(520px, 100%);
   border-radius: 24px;
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.22);
+  border: 3px solid var(--text) !important;
+  outline: 3px solid var(--text);
   padding: 32px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 18px;
 }
 
@@ -33,20 +35,18 @@
   font-family: 'DM Mono';
   font-size: 13px;
   line-height: 1.8;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .subText {
-  margin: 0;
-  font-family: 'DM Mono';
-  font-size: 12px;
-  color: var(--text-muted);
+  display: none;
 }
 
 .buttonGroup {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .primaryButton,
@@ -79,28 +79,14 @@
 .secondaryButton {
   background: transparent;
   color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 2px solid var(--text);
 }
 
 .secondaryButton:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.28);
+  background: transparent;
+  border-color: var(--text);
 }
 
 .closeButton {
-  align-self: flex-end;
-  margin-top: 4px;
-  padding: 10px 16px;
-  border-radius: 14px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-muted);
-  font-family: 'DM Mono';
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.closeButton:hover {
-  color: var(--text);
-  border-color: rgba(255, 255, 255, 0.24);
+  display: none;
 }
