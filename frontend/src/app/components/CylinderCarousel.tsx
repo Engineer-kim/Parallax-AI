@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import ModelCard from './ModelCard'
 import styles from './css/CylinderCarousel.module.css'
 import type { CylinderCarouselProps } from '@/lib/types'
+import { useMediaQuery } from 'usehooks-ts'
 
 export default function CylinderCarousel({ results, onSelect, selectedModel }: CylinderCarouselProps) {
   const [current, setCurrent] = useState(0)
@@ -19,7 +20,10 @@ export default function CylinderCarousel({ results, onSelect, selectedModel }: C
     return 'left'
   }
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+  const isMobile = useMediaQuery('(max-width: 768px)', {
+    defaultValue: false,
+    initializeWithValue: false,
+  })
 
 
   const positionX: Record<string, number> = isMobile ? { center: 0, left: -140, right: 140,} : { center: 0, left: -420, right: 420,}

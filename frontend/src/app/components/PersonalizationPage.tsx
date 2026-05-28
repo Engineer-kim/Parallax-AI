@@ -8,6 +8,7 @@ import styles from '../personalization/page.module.css'
 import { PersonalizationPageProps, UserSettings } from '@/lib/types'
 import { savePersonalizationSettings, saveApiKey, deleteApiKey } from '@/lib/api'
 import { useTheme } from '@/lib/hooks/useTheme'
+import { useMediaQuery } from 'usehooks-ts'
 
 export default function PersonalizationClient({ accountId }: PersonalizationPageProps) {
   const { isDark, toggleTheme } = useTheme()
@@ -71,6 +72,11 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
     setSettings(prev => ({ ...prev, theme }))
   }
 
+  const isMobile = useMediaQuery('(max-width: 768px)', {
+    defaultValue: false,
+    initializeWithValue: false,
+  })
+
   return (
     <div className={styles.personalizationContainer}>
       <header className={styles.header}>
@@ -112,36 +118,36 @@ export default function PersonalizationClient({ accountId }: PersonalizationPage
                 </div>
               </div>
             </div>
-
-            <div className={styles.settingCard}>
-              <h3 className={styles.settingCardTitle}>응답 레이아웃</h3>
-              <p className={styles.settingCardDescription}>AI 응답 표시 방식을 설정합니다.</p>
-              <div className={styles.settingCardContent}>
-                <div className={styles.preferencesGrid}>
-                 <button
-                    className={`${styles.preferenceButton} ${responseLayout === 'carousel' ? styles.active : ''}`}
-                    onClick={() => setResponseLayout('carousel')}>
-                     <div className={styles.layoutPreviewCarousel}>
-                        <div className={styles.layoutPreviewCenter} />
-                        <div className={styles.layoutPreviewLeft} />
-                        <div className={styles.layoutPreviewRight} />
-                      </div>
-                    캐러셀
-                  </button>
-
+            {!isMobile && (
+              <div className={styles.settingCard}>
+                <h3 className={styles.settingCardTitle}>응답 레이아웃</h3>
+                <p className={styles.settingCardDescription}>AI 응답 표시 방식을 설정합니다.</p>
+                <div className={styles.settingCardContent}>
+                  <div className={styles.preferencesGrid}>
                   <button
-                    className={`${styles.preferenceButton} ${responseLayout === 'bento' ? styles.active : ''}`}
-                    onClick={() => setResponseLayout('bento')}>
-                     <div className={styles.layoutPreviewBento}>
-                      <div className={styles.layoutPreviewBentoItem} />
-                      <div className={styles.layoutPreviewBentoItem} />
-                      <div className={styles.layoutPreviewBentoItem} />
-                    </div>
-                    벤토
-                  </button>
+                      className={`${styles.preferenceButton} ${responseLayout === 'carousel' ? styles.active : ''}`}
+                      onClick={() => setResponseLayout('carousel')}>
+                      <div className={styles.layoutPreviewCarousel}>
+                          <div className={styles.layoutPreviewCenter} />
+                          <div className={styles.layoutPreviewLeft} />
+                          <div className={styles.layoutPreviewRight} />
+                        </div>
+                      캐러셀
+                    </button>
+                      <button
+                        className={`${styles.preferenceButton} ${responseLayout === 'bento' ? styles.active : ''}`}
+                        onClick={() => setResponseLayout('bento')}>
+                        <div className={styles.layoutPreviewBento}>
+                          <div className={styles.layoutPreviewBentoItem} />
+                          <div className={styles.layoutPreviewBentoItem} />
+                          <div className={styles.layoutPreviewBentoItem} />
+                        </div>
+                        벤토
+                      </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

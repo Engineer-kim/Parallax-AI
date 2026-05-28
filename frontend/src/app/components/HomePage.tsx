@@ -9,12 +9,18 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useChatManager } from '@/lib/hooks/useChatManager'
 import { useTheme } from '@/lib/hooks/useTheme'
 import { blockHistoryNavigation } from '@/lib/util/historyDelete'
-import { useEffect, useState } from 'react'
 import BentoCompare from './BentoCompare'
 import { Menu } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useMediaQuery } from 'usehooks-ts'
 
 export default function HomeClient({ initialAccountId }: { initialAccountId: number | null }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  const isMobile = useMediaQuery('(max-width: 768px)', {
+    defaultValue: false,
+    initializeWithValue: false,
+  })
 
   const [responseLayout] = useState<'carousel' | 'bento'>(() => {
     if (typeof window === 'undefined') return 'carousel'
@@ -23,6 +29,8 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
 
     return saved === 'bento' ? 'bento' : 'carousel'
   })
+
+  const effectiveLayout = isMobile ? 'carousel' : responseLayout
 
   useEffect(() => {
     const cleanup = blockHistoryNavigation()
@@ -195,7 +203,7 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
                           onSelect={result => handleSelect(result, idx)}
                           selectedModel={msg.selectedResult?.model}
                         /> */}
-                        {responseLayout === 'carousel' ? (
+                        {effectiveLayout === 'carousel' ? (
                           <CylinderCarousel
                             results={results}
                             onSelect={result => handleSelect(result, idx)}
