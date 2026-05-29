@@ -123,7 +123,7 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
               <Menu size={20} />
             </button>
 
-          <div className={styles.branding}>GPT-4o · GEMINI · CLAUDE</div>
+          <div className={styles.branding}>PARALLAX AGENT</div>
 
           <div className={styles.headerRight}>
             <div className={`${styles.statusBlock} ${isLoggedIn ? styles.loggedIn : styles.loggedOut}`}>

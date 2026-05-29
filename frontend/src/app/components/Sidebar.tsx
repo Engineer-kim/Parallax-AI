@@ -27,7 +27,7 @@ export default function Sidebar({ chats, currentId, onNew, onSelect, onThemeTogg
       {/* 로고 */}
       <div className={styles.logoSection}>
         <div className={styles.logo}>PARALLAX</div>
-        <div className={styles.tagline}>AI COMPARISON ENGINE</div>
+        <div className={styles.tagline}>한번의 요청으로 여러답변을 비교해보세요</div>
       </div>
       
       <div className={styles.newChatButtonContainer}>
