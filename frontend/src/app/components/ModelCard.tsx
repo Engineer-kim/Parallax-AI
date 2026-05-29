@@ -15,7 +15,7 @@ const MODEL_LABELS: Record<string, string> = {
   claude: 'Claude',
 }
 
-export default function ModelCard({ model, result, error, latency, isCenter, isSelected, onSelect }: ModelCardProps) {
+export default function ModelCard({ model, result, error, latency, isCenter, isSelected, isLocked, onSelect }: ModelCardProps) {
   const color = MODEL_COLORS[model] || '#ffffff'
   const label = MODEL_LABELS[model] || model
 
@@ -81,6 +81,7 @@ export default function ModelCard({ model, result, error, latency, isCenter, isS
 
       {isCenter && result && (
         <button
+          disabled={isLocked}
           onClick={onSelect}
           className={`${styles.selectButton} ${isSelected ? styles.selectButtonActive : styles.selectButtonInactive}`}
           style={{
@@ -89,7 +90,10 @@ export default function ModelCard({ model, result, error, latency, isCenter, isS
             color: isSelected ? 'var(--bg)' : color,
           }}
         >
-          {isSelected ? '✓ 선택됨 — 이 응답으로 대화 중' : '이 응답 선택'}
+          { isLocked ? '선택 완료' : isSelected
+                ? '✓ 선택됨 — 이 응답으로 대화 중'
+                : '이 응답 선택'
+          }
         </button>
       )}
     </div>

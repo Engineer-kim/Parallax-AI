@@ -6,7 +6,7 @@ import styles from './css/CylinderCarousel.module.css'
 import type { CylinderCarouselProps } from '@/lib/types'
 import { useMediaQuery } from 'usehooks-ts'
 
-export default function CylinderCarousel({ results, onSelect, selectedModel }: CylinderCarouselProps) {
+export default function CylinderCarousel({ results, onSelect, selectedModel, locked }: CylinderCarouselProps) {
   const [current, setCurrent] = useState(0)
   const dragStart = useRef(0)
 
@@ -58,6 +58,7 @@ export default function CylinderCarousel({ results, onSelect, selectedModel }: C
                 latency={r.latency_ms}
                 isCenter={pos === 'center'}
                 isSelected={selectedModel === r.model}
+                isLocked={locked}
                 onSelect={() => onSelect(r)}
               />
             </motion.div>

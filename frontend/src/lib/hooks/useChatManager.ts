@@ -31,6 +31,7 @@ export function useChatManager() {
       title: 'new chat',
       date: new Date().toLocaleDateString('ko-KR'),
       messages: [],
+      
     }
     setChats(prev => [chat, ...prev])
     setCurrentId(id)
@@ -39,14 +40,22 @@ export function useChatManager() {
   }
 
   const handleSelect = (result: Result, messageIndex: number) => {
-    setChats(prev => prev.map(c => {
-      if (c.id !== currentId) return c
-      const messages = [...c.messages]
-      if (messageIndex >= 0 && messageIndex < messages.length && messages[messageIndex].role === 'assistant') {
-        messages[messageIndex] = { ...messages[messageIndex], selectedResult: result }
-      }
-      return { ...c, messages }
-    }))
+    setChats(prev =>
+      prev.map(c => {
+        if (c.id !== currentId) return c
+
+        return {
+          ...c,
+          messages: c.messages.map((m, idx) => {
+            if (idx === messageIndex && m.role === 'assistant' && !m.selectionLocked) {
+              return { ...m, selectedResult: result,}
+            }
+
+            return m
+          }),
+        }
+      }),
+    )
   }
 
   const handleSend = async (content: string, file?: Base64File, accountId?: number | null): Promise<boolean> => {
@@ -72,6 +81,22 @@ export function useChatManager() {
     }
 
     const currentMessages = chats.find(c => c.id === chatId)?.messages || []
+    setChats(prev =>
+      prev.map(c => {
+        if (c.id !== chatId) return c
+
+        return {
+          ...c,
+          messages: c.messages.map(m => {
+            if ( m.role === 'assistant') {
+              return { ...m, selectionLocked: true,}
+            }
+
+            return m
+          }),
+        }
+      }),
+    )
     const userMsgCount = currentMessages.filter(m => m.role === 'user').length
     const inputOrder = userMsgCount + 1
 
@@ -79,12 +104,12 @@ export function useChatManager() {
       .reverse()
       .find(m => m.selectedResult)?.selectedResult
 
-    let finalContent = content
-    if (lastSelectedResult?.result) {
-      finalContent =
-        `이전 대화 맥락 (${lastSelectedResult.model} 응답):\n` +
-        `${lastSelectedResult.result}\n\n사용자 질문: ${content}`
-    }
+    // let finalContent = content
+    // if (lastSelectedResult?.result) {
+    //   finalContent =
+    //     `이전 대화 맥락 (${lastSelectedResult.model} 응답):\n` +
+    //     `${lastSelectedResult.result}\n\n사용자 질문: ${content}`
+    // }
 
     let contentType: 'text' | 'file' | 'image' | 'video' = 'text'
     if (file) {
@@ -119,7 +144,7 @@ export function useChatManager() {
         input_order: inputOrder,
         selected_model: lastSelectedResult?.model || null,
         content_type: contentType,
-        content: finalContent,
+        content: content,
         file_name: file?.name || null,
         file_url: null,
         mime_type: null,
@@ -245,6 +270,7 @@ export function useChatManager() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ? m.results.find((r: any) => r.model === m.selected_model) || undefined
               : undefined,
+            selectionLocked: !!m.selected_model,
           })
         }
       })

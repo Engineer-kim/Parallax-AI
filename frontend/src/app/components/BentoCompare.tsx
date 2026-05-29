@@ -8,7 +8,8 @@ import type { CylinderCarouselProps } from '@/lib/types'
 export default function BentoCompare({
   results,
   onSelect,
-  selectedModel
+  selectedModel,
+  locked,
 }: CylinderCarouselProps) {
   if (!results || results.length === 0) return null
 
@@ -40,6 +41,7 @@ export default function BentoCompare({
           latency={selected.latency_ms}
           isCenter
           isSelected
+          isLocked={locked}
           onSelect={() => {}}
         />
       </motion.div>
@@ -66,6 +68,7 @@ export default function BentoCompare({
               latency={r.latency_ms}
               isCenter
               isSelected={false}
+              isLocked={locked}
               onSelect={() => onSelect(r)}
             />
           </motion.div>

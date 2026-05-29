@@ -208,12 +208,14 @@ export default function HomeClient({ initialAccountId }: { initialAccountId: num
                             results={results}
                             onSelect={result => handleSelect(result, idx)}
                             selectedModel={msg.selectedResult?.model}
+                            locked={msg.selectionLocked}
                           />
                         ) : (
                           <BentoCompare
                             results={results}
                             onSelect={result => handleSelect(result, idx)}
                             selectedModel={msg.selectedResult?.model}
+                            locked={msg.selectionLocked}
                           />
                         )}
                       </div>

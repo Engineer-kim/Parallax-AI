@@ -179,6 +179,17 @@ class ChatService:
 
         for message in messages:
             responses = await self.ai_response_repository.find_by_message_id(message.id)
+
+            sorted_responses = []
+            if message.selected_model:
+                selected = next((r for r in responses if r.model == message.selected_model), None)
+                if selected:
+                    sorted_responses.append(selected)
+                sorted_responses.extend([r for r in responses if r.model != message.selected_model])
+            else:
+                sorted_responses = responses
+
+
             result.append({
                 "message_id": message.id,
                 "role": message.role,
@@ -195,7 +206,7 @@ class ChatService:
                         "error": r.error,
                         "latency_ms": r.latency_ms,
                     }
-                    for r in responses
+                    for r in sorted_responses
                 ]
             })
 

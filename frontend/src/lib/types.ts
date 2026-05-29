@@ -55,6 +55,7 @@ export interface Message {
   content: string
   results?: Result[]
   selectedResult?: Result
+  selectionLocked?: boolean
 }
 
 export interface Chat {
@@ -101,12 +102,14 @@ export interface ModelCardProps {
   isCenter: boolean
   isSelected: boolean
   onSelect: () => void
+  isLocked?: boolean
 }
 
 export interface CylinderCarouselProps {
   results: Result[]
   onSelect: (result: Result) => void
   selectedModel?: string
+  locked?: boolean
 }
 
 export interface ChatInputProps {
