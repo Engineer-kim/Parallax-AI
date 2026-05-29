@@ -104,3 +104,17 @@
   background: var(--border);
   color: var(--text-muted);
 }
+html[data-theme='dark'] .inputBox {
+  border: 1px solid #ffffff;
+}
+
+html[data-theme='light'] .inputBox {
+  border: 1px solid #000000;
+}
+html[data-theme='dark'] .sendButton {
+  border: 1px solid #ffffff;
+}
+
+html[data-theme='light'] .sendButton {
+  border: 1px solid #000000;
+}
