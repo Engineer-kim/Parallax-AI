@@ -88,7 +88,7 @@ export function useChatManager() {
         return {
           ...c,
           messages: c.messages.map(m => {
-            if ( m.role === 'assistant') {
+            if (m.role === 'assistant' && m.selectedResult) {
               return { ...m, selectionLocked: true,}
             }
 
@@ -253,8 +253,16 @@ export function useChatManager() {
       const data = await fetchChatDetailHistory(sessionId)
       const messages: Message[] = []
 
+      let lastResponseIndex = -1
+      for (let i = data.length - 1; i >= 0; i--) {
+        if (data[i].results && data[i].results.length > 0) {
+          lastResponseIndex = i
+          break
+        }
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data.forEach((m: any) => {
+      data.forEach((m: any, index: number) => {
         messages.push({
           role: 'user',
           content: m.content || '',
@@ -262,15 +270,16 @@ export function useChatManager() {
         })
 
         if (m.results && m.results.length > 0) {
+          const isLastResponse = index === lastResponseIndex
           messages.push({
             role: 'assistant',
             content: '',
             results: m.results,
-            selectedResult: m.selected_model
+            selectedResult: (!isLastResponse && m.selected_model)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ? m.results.find((r: any) => r.model === m.selected_model) || undefined
               : undefined,
-            selectionLocked: !!m.selected_model,
+            selectionLocked: !isLastResponse,
           })
         }
       })

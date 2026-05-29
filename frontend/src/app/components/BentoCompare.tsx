@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import ModelCard from './ModelCard'
 import styles from './css/BentoCompare.module.css'
 import type { CylinderCarouselProps } from '@/lib/types'
+import { getSortedResults } from '@/lib/util/resultSorter'
 
 export default function BentoCompare({
   results,
@@ -13,12 +14,17 @@ export default function BentoCompare({
 }: CylinderCarouselProps) {
   if (!results || results.length === 0) return null
 
-  const selected =
-    results.find(r => r.model === selectedModel) || results[0]
+  const sortedResults = getSortedResults(results, selectedModel)
 
-  const others = results.filter(
-    r => r.model !== selected.model
-  )
+  const selected = sortedResults[0]
+  const others = sortedResults.slice(1)
+
+  // const selected =
+  //   results.find(r => r.model === selectedModel) || results[0]
+
+  // const others = results.filter(
+  //   r => r.model !== selected.model
+  // )
 
   return (
     <div className={styles.grid}>
@@ -40,7 +46,7 @@ export default function BentoCompare({
           error={selected.error}
           latency={selected.latency_ms}
           isCenter
-          isSelected
+          isSelected={selectedModel === selected.model}
           isLocked={locked}
           onSelect={() => {}}
         />
@@ -67,7 +73,7 @@ export default function BentoCompare({
               error={r.error}
               latency={r.latency_ms}
               isCenter
-              isSelected={false}
+              isSelected={selectedModel === r.model}
               isLocked={locked}
               onSelect={() => onSelect(r)}
             />
